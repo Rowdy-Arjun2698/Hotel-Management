@@ -26,5 +26,5 @@ app.get("/",(req,res)=>{
 })
 app.use("/api/hotel",authRoute);
 app.use("/api/table",tableRoute);
-app.use("/api/menu",)
+app.use("/api/menu",menuRoute)
 module.exports=app;

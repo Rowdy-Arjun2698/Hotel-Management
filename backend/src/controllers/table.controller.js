@@ -7,8 +7,7 @@ const fs = require("fs");
 
 async function addtables(req,res){
     const hotelId=req.hotel._id.toString();
-    console.log(req.hotel._id)
-    console.log(req.body)
+ 
     if(!hotelId){
         return res.status(400).json({
             message:"Hotel id not found"
@@ -78,7 +77,7 @@ if(!user){
         hotelId:user
 })
     
-    console.log(data)
+   
 try {
     res.status(201).json({
         success:true,

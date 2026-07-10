@@ -2,80 +2,112 @@ const hotel= require("../models/hotel_info.model")
 const bcrypt=require("bcryptjs");
 const jwt=require("jsonwebtoken")
 const createHotelFolders=require("../utils/createfolder")
+const DEFAULT_CATEGORIES=require("../constant/defaultcatagory")
+const deleteHotelFolders = require("../utils/deletefolder");
+const catagoryModel = require("../models/catagory.model");
 
-async function registerhotel(req,res){
+async function registerhotel(req, res) {
+    const {
+        hotelName,
+        owenerName,
+        email,
+        password,
+        phone,
+        address,
+        city,
+        pincode,
+        gstnumber,
+        fssaiNumber,
+        logo,
+        tables,
+        openingtime,
+        closetime,
+        gstenable,
+        gstper,
+    } = req.body;
 
-    const {hotelName,
-    owenerName,
-    email,
-    password,
-    phone,
-    address,
-    city,
-     pincode,
-     gstnumber,
-    fssaiNumber,
-     logo,
-    tables,
-    openingtime,
-    closetime,
-    gstenable,
-    gstper}  =req.body;
+    const isHotelAlreadyexists = await hotel.findOne({ email });
 
-    const isHotelAlreadyexists= await hotel.findOne({
-        email
-    })
-
-    if(isHotelAlreadyexists){
+    if (isHotelAlreadyexists) {
         return res.status(400).json({
-            message:"User already exists"
-        })
+            message: "User already exists",
+        });
     }
 
-    const hashPassword = await bcrypt.hash(password,10);
-    const hot=await hotel.create({
-        hotelName,
-    owenerName,
-    email,
-    password: hashPassword,
-    phone,
-    address,
-    city,
-     pincode,
-     gstnumber,
-    fssaiNumber,
-     logo,
-    tables,
-    openingtime,
-    closetime,
-    gstenable,
-    gstper
-    })
+    let hot; // <-- Declare outside try
 
-    createHotelFolders(hot._id);
+    try {
+        const hashPassword = await bcrypt.hash(password, 10);
 
-    const token=jwt.sign({
-        id:hot._id,
-    },process.env.JWT_SECRET)
+        hot = await hotel.create({
+            hotelName,
+            owenerName,
+            email,
+            password: hashPassword,
+            phone,
+            address,
+            city,
+            pincode,
+            gstnumber,
+            fssaiNumber,
+            logo,
+            tables,
+            openingtime,
+            closetime,
+            gstenable,
+            gstper,
+        });
 
-        console.log
+        createHotelFolders(hot._id);
 
-    res.cookie("token",token, {
-        httpOnly: true,
-        secure: false,
-        sameSite: "lax"
-    }  )
+        const token = jwt.sign(
+            { id: hot._id },
+            process.env.JWT_SECRET
+        );
 
-    res.status(201).json({
-        message:"Hotel registed successfully",
-        hotel:{
-            _id:hot._id,
-            email:hot.email,
-            owenerName:hot.owenerName
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: false,
+            sameSite: "lax",
+        });
+
+        for (const category of DEFAULT_CATEGORIES) {
+            await catagoryModel.create({
+                mainCategory: category.mainCategory,
+                Catname: category.Catname,
+                isDefault: true,
+                hotelId: hot._id,
+            });
         }
-    })
-}
 
+        return res.status(201).json({
+            message: "Hotel registered successfully",
+            hotel: {
+                _id: hot._id,
+                email: hot.email,
+                owenerName: hot.owenerName,
+            },
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        if (hot) {
+            await catagoryModel.deleteMany({
+                hotelId: hot._id,
+            });
+
+            await hotel.findByIdAndDelete(hot._id);
+
+            await deleteHotelFolders(hot._id);
+        }
+
+        return res.status(500).json({
+            success: false,
+            message: "Error at the time of hotel registration",
+        });
+    }
+}
 async function hotellogin(req,res) {
 
 
@@ -129,6 +161,7 @@ async function hotellogout(req,res) {
     })
     
 }
+
 
 module.exports={
     registerhotel,
