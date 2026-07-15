@@ -87,7 +87,51 @@ async function showcat(req,res) {
     
 }
 
+async function addCat(req,res) {
+    console.log(req.hotel);
+    if(! req.hotel){
+        return res.status(400).json({
+            message:"Login first "
+        })
+    }
+    console.log(req.body);
+    const {mainCategory,Catname}=req.body;
+    if(! {mainCategory,Catname}){
+        return res.status(400).json({
+            message:"No api call"
+        })
+    }
+    try {
+  //............................
+         await catagoryModel.create({
+                        mainCategory:mainCategory,
+                        Catname: Catname,
+                        isDefault: false,
+                        hotelId: req.hotel._id.toString(),
+                    });
+
+            res.status(201).json({
+                message:"successfully Added the catagory",
+                success:true
+
+            })
+
+        
+    } catch (error) {
+
+        res.status(500).json({
+            message:"Something Error occur during adding the catagory",
+            error:error.message,
+            success:false
+        })
+        
+    }
+
+    
+}
+
 module.exports={
     addmenu,
-    showcat
+    showcat,
+    addCat
 }

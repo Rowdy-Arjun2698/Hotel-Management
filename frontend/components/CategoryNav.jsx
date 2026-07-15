@@ -2,9 +2,10 @@ import { Search, Plus, ChevronDown } from "lucide-react";
 import {useState, useEffect} from "react";
 import  axios from "axios";
 
-const CategoryNav = () => {
+const CategoryNav = ({setopenform,refreshCategories}) => {
 const [mainCategory, setMainCategory] = useState("All");
 const [subCat, setAllCat] = useState([]);
+
    async function  fetchAllCategory() {
     try {
       const response = await axios.get(
@@ -32,7 +33,7 @@ const filteredCategories =
 
 useEffect(() => {
   fetchAllCategory();
-}, []);
+}, [subCat,refreshCategories]);
 
   return (
     <div className="bg-white rounded-2xl p-5 mb-6 shadow-sm ring-1 ring-black/5">
@@ -125,6 +126,7 @@ useEffect(() => {
                      transition-all duration-200 ease-out
                      hover:bg-orange-200 hover:-translate-y-0.5
                      active:translate-y-0 active:scale-[0.97]"
+                onClick={()=>setopenform(true)}     
         >
           <Plus size={18} />
           Category
