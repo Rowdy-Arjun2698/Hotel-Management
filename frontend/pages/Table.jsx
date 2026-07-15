@@ -34,7 +34,7 @@ const Table = () => {
   }, [allTables]);
 
   return (
-    <div className="w-[80vw] h-[95vh] bg-white flex flex-wrap gap-5 overflow-y-auto">
+    <div className="w-full h-full bg-white flex flex-wrap gap-5 overflow-y-auto">
 
       {allTables.map((card) => (
         <TableCard

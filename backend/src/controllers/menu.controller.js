@@ -1,5 +1,5 @@
 const Menu=require("../models/menu.model")
-
+const catagoryModel = require("../models/catagory.model");
 
 async function addmenu(req,res) {
      if(!req.hotel){
@@ -60,6 +60,34 @@ try {
     
 }
 
+async function showcat(req,res) {
+    console.log(req.hotel);
+    if(! req.hotel){
+        return res.status(400).json({
+            message:"Login first "
+        })
+    }
+
+    try {
+       const categories = await catagoryModel.find({
+  hotelId: req.hotel._id.toString()
+}); 
+  res.status(200).json({
+    categories,
+    message:"Succefully fetched the catagory !!",
+    success:true
+  })
+    } catch (error) {
+         res.status(500).json({
+    message:"something wrong",
+    error:error.message,
+    success:false
+  })
+    }
+    
+}
+
 module.exports={
-    addmenu
+    addmenu,
+    showcat
 }

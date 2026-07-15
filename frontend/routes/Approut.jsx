@@ -5,6 +5,7 @@ import HotelAdmin from "../layout/HotelAdmin";
 import Home from "../pages/Home";
 import Settings from "../pages/Settings";
 import Table from "../pages/Table";
+import Menu from "../pages/Menu"
 
 const router=createBrowserRouter([
     {
@@ -31,6 +32,10 @@ const router=createBrowserRouter([
        {
         path: "Table",
         element: <Table />
+      },
+      {
+        path: "Menu",
+        element: <Menu/>
       }
     ]
   }

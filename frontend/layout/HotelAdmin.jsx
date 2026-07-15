@@ -9,7 +9,6 @@ const HotelAdmin = () => {
   <div className="w-[20vw] h-full bg-[#151514ff] "><Sidebar /></div>
 
    <div className="w-[80vw] h-full bg-amber-100 flex flex-col gap-2 ">
-    <Navbar />
      <Outlet />
    </div>
 
