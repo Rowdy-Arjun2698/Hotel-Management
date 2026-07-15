@@ -1,12 +1,95 @@
-import { Search, Plus, ChevronDown } from "lucide-react";
-import {useState, useEffect} from "react";
-import  axios from "axios";
+import { Search, Plus, ChevronDown, Check } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import axios from "axios";
 
-const CategoryNav = ({setopenform,refreshCategories}) => {
-const [mainCategory, setMainCategory] = useState("All");
-const [subCat, setAllCat] = useState([]);
+// Reusable custom dropdown — looks like the old select, but styleable
+const Dropdown = ({ value, onChange, options, width = "w-full" }) => {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef(null);
 
-   async function  fetchAllCategory() {
+  useEffect(() => {
+    function handleClick(e) {
+      if (rootRef.current && !rootRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  return (
+    <div className={`relative group ${width}`} ref={rootRef}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className={`w-full h-12 rounded-full bg-gray-100 pl-5 pr-10 outline-none
+                    text-left cursor-pointer
+                    transition-all duration-200 ease-out
+                    hover:bg-gray-200/70
+                    focus:bg-white focus:ring-2 focus:ring-orange-300
+                    ${open ? "bg-white ring-2 ring-orange-300 shadow-sm" : ""}`}
+      >
+        <span className="truncate">{value}</span>
+      </button>
+
+      <ChevronDown
+        size={16}
+        className={`pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-500
+                    transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+      />
+
+      <div
+        className={`absolute z-20 left-0 right-0 mt-2 origin-top
+                    transition-all duration-150 ease-out
+                    ${open
+                      ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
+                      : "opacity-0 scale-95 -translate-y-1 pointer-events-none"}`}
+      >
+        <ul
+          role="listbox"
+          className="max-h-64 overflow-auto rounded-2xl bg-white border border-gray-200
+                     shadow-lg shadow-gray-900/5 p-1.5 space-y-0.5"
+        >
+          {options.map((opt) => {
+            const isSelected = opt.value === value;
+            return (
+              <li
+                key={opt.key}
+                role="option"
+                aria-selected={isSelected}
+                onClick={() => {
+                  onChange(opt.value);
+                  setOpen(false);
+                }}
+                className={`flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl text-sm
+                            cursor-pointer select-none transition-colors duration-150
+                            ${isSelected
+                              ? "bg-orange-50 text-orange-600 font-medium"
+                              : "text-gray-700 hover:bg-gray-100"}`}
+              >
+                <span className="truncate">{opt.value}</span>
+                {isSelected && <Check size={16} className="text-orange-500 shrink-0" />}
+              </li>
+            );
+          })}
+
+          {options.length === 0 && (
+            <li className="px-4 py-3 text-sm text-gray-400 text-center">
+              No categories found
+            </li>
+          )}
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+const CategoryNav = ({ setopenform, refreshCategories }) => {
+  const [mainCategory, setMainCategory] = useState("All");
+  const [subCat, setAllCat] = useState([]);
+  const [category, setCategory] = useState("");
+
+  async function fetchAllCategory() {
     try {
       const response = await axios.get(
         "http://localhost:3000/api/menu/fetch_cat",
@@ -15,28 +98,23 @@ const [subCat, setAllCat] = useState([]);
         }
       );
 
-    
-
-     setAllCat(response.data.categories);
-       
-
+      setAllCat(response.data.categories);
     } catch (error) {
       console.error("Error fetching tables:", error);
     }
   }
 
-const filteredCategories =
-  mainCategory === "All"
-    ? subCat
-    : subCat.filter((cat) => cat.mainCategory === mainCategory);
+  const filteredCategories =
+    mainCategory === "All"
+      ? subCat
+      : subCat.filter((cat) => cat.mainCategory === mainCategory);
 
-
-useEffect(() => {
-  fetchAllCategory();
-}, [subCat,refreshCategories]);
+  useEffect(() => {
+    fetchAllCategory();
+  }, [subCat, refreshCategories]);
 
   return (
-    <div className="bg-white rounded-2xl p-5 mb-6 shadow-sm ring-1 ring-black/5">
+    <div className="bg-white rounded-2xl p-5 m-3 shadow-sm ring-1 ring-black/5">
       <div className="flex flex-wrap items-end gap-5">
 
         {/* Search */}
@@ -67,25 +145,15 @@ useEffect(() => {
             Main Category
           </label>
 
-          <div className="relative group">
-            <select
-              className="w-full h-12 rounded-full bg-gray-100 pl-5 pr-10 outline-none
-                         appearance-none cursor-pointer
-                         transition-all duration-200 ease-out
-                         hover:bg-gray-200/70
-                         focus:bg-white focus:ring-2 focus:ring-orange-300 focus:shadow-sm"
-                         value={mainCategory}
-                         onChange={(e)=> setMainCategory(e.target.value)}
-            >
-              <option>All</option>
-              <option>Food</option>
-              <option>Beverages</option>
-            </select>
-            <ChevronDown
-              size={16}
-              className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 transition-transform duration-200 group-focus-within:rotate-180"
-            />
-          </div>
+          <Dropdown
+            value={mainCategory}
+            onChange={setMainCategory}
+            options={[
+              { key: "all", value: "All" },
+              { key: "food", value: "Food" },
+              { key: "beverages", value: "Beverages" },
+            ]}
+          />
         </div>
 
         {/* Category */}
@@ -94,29 +162,14 @@ useEffect(() => {
             Category
           </label>
 
-          <div className="relative group">
-            <select
-              className="w-full h-12 rounded-full bg-gray-100 pl-5 pr-10 outline-none
-                         appearance-none cursor-pointer
-                         transition-all duration-200 ease-out
-                         hover:bg-gray-200/70
-                         focus:bg-white focus:ring-2 focus:ring-orange-300 focus:shadow-sm"
-            >
-              {filteredCategories.map((cat) => (
- <option
-    key={cat._id}
-    value={cat.Catname}
->
-    {cat.Catname}
-</option>
-))}
-            {}
-            </select>
-            <ChevronDown
-              size={16}
-              className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 transition-transform duration-200 group-focus-within:rotate-180"
-            />
-          </div>
+          <Dropdown
+            value={category}
+            onChange={setCategory}
+            options={filteredCategories.map((cat) => ({
+              key: cat._id,
+              value: cat.Catname,
+            }))}
+          />
         </div>
 
         {/* Add Category */}
@@ -126,7 +179,7 @@ useEffect(() => {
                      transition-all duration-200 ease-out
                      hover:bg-orange-200 hover:-translate-y-0.5
                      active:translate-y-0 active:scale-[0.97]"
-                onClick={()=>setopenform(true)}     
+          onClick={() => setopenform(true)}
         >
           <Plus size={18} />
           Category
