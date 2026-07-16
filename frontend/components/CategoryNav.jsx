@@ -84,37 +84,20 @@ const Dropdown = ({ value, onChange, options, width = "w-full" }) => {
   );
 };
 
-const CategoryNav = ({ setopenform, refreshCategories }) => {
+const CategoryNav = ({ setopenform, refreshCategories,categories,setdish }) => {
   const [mainCategory, setMainCategory] = useState("All");
-  const [subCat, setAllCat] = useState([]);
+
   const [category, setCategory] = useState("");
 
-  async function fetchAllCategory() {
-    try {
-      const response = await axios.get(
-        "http://localhost:3000/api/menu/fetch_cat",
-        {
-          withCredentials: true,
-        }
-      );
-
-      setAllCat(response.data.categories);
-    } catch (error) {
-      console.error("Error fetching tables:", error);
-    }
-  }
 
   const filteredCategories =
     mainCategory === "All"
-      ? subCat
-      : subCat.filter((cat) => cat.mainCategory === mainCategory);
+      ? categories
+      : categories.filter((cat) => cat.mainCategory === mainCategory);
 
-  useEffect(() => {
-    fetchAllCategory();
-  }, [subCat, refreshCategories]);
 
   return (
-    <div className="bg-white rounded-2xl p-5 m-3 shadow-sm ring-1 ring-black/5">
+    <div className="bg-white rounded-2xl p-5 sticky m-3 shadow-sm ring-1 ring-black/5">
       <div className="flex flex-wrap items-end gap-5">
 
         {/* Search */}
@@ -192,6 +175,7 @@ const CategoryNav = ({ setopenform, refreshCategories }) => {
                      transition-all duration-200 ease-out
                      hover:bg-[#bc742b] hover:-translate-y-0.5 hover:shadow-md hover:shadow-orange-200/60
                      active:translate-y-0 active:scale-[0.97]"
+                     onClick={()=>setdish(true)}
         >
           <Plus size={18} />
           Dish
