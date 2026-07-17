@@ -1,64 +1,82 @@
 const Menu=require("../models/menu.model")
 const catagoryModel = require("../models/catagory.model");
 
-async function addmenu(req,res) {
-     if(!req.hotel){
+async function addmenu(req, res) {
+
+    if (!req.hotel) {
+        return res.status(401).json({
+            success: false,
+            message: "Login First"
+        });
+    }
+
+    if (!req.body) {
         return res.status(400).json({
-            message:"Login First"
-        })
-     }
+            success: false,
+            message: "Give correct info"
+        });
+    }
 
-     if(!req.body){
-        return res.status(400).json({
-            message:"Give correct info"
-        })
-     }
+    try {
 
-   // creating the object for the dish collection 
-   const {
-  dishName,
-  category,
-  description,
-  image,
-  foodType,
-  variants,
-  isAvailable,
-  todayLimit,
-  todaySold,
-  totalSold,
-  preparationTime,
-} = req.body;
+        const {
+            dishName,
+            categoryId,
+            description,
+            foodType,
+            isAvailable,
+        } = req.body;
 
-const menuData = {
-  hotelId: req.hotel._id.toString(), // From JWT
-  dishName,
-  category,
-  description,
-  foodType,
-  variants,
-  isAvailable,
-  todaySold,
-  totalSold,
-};
+        // Convert variants back to array
+        const parsedVariants = JSON.parse(req.body.variants);
 
-try {
-    const dish=await Menu.create(menuData)
-    res.status(201).json({
-        success:true,
-        message:"Add new dish"
-    })
-    
-} catch (error) {
-    res.status(500).json({
-        success:false,
-        message: "error adding new dish",
-        error:error
-    })
-    
+        const menuData = {
+
+            hotelId: req.hotel._id,
+
+            dishName,
+
+            categoryId,
+
+            description,
+
+            foodType,
+
+            variants: parsedVariants,
+
+            isAvailable: isAvailable === "true",
+
+
+            // Store uploaded image name
+            image: req.file ? req.file.filename : null,
+
+            // OR store full relative path
+            // image: req.file ? `/uploads/hotel_${req.hotel._id}/dishes/${req.file.filename}` : null
+
+        };
+
+        const dish = await Menu.create(menuData);
+
+        res.status(201).json({
+            success: true,
+            message: "New dish added successfully",
+            dish
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Error adding new dish",
+            error: error.message
+        });
+
+    }
+
 }
- 
-    
-}
+
 
 async function showcat(req,res) {
     console.log(req.hotel);
@@ -130,8 +148,37 @@ async function addCat(req,res) {
     
 }
 
+async function fethAllmenu(req,res) {
+    if (!req.hotel) {
+        return res.status(401).json({
+            success: false,
+            message: "Login First"
+        });
+    }
+    
+    try {
+        const dishes = await Menu.find({
+  hotelId: req.hotel._id
+    })
+    res.status(201).json({
+        message:"All dishes fetched",
+        success:true,
+        dishes
+    })
+    } catch (error) {
+        res.status(500).json({
+            message:"error in fetching or finding database",
+            success:false,
+            error:error.message
+        })
+    }
+    
+}
+
+
 module.exports={
     addmenu,
     showcat,
-    addCat
+    addCat,
+    fethAllmenu
 }

@@ -164,7 +164,8 @@ const AddDishForm = ({ onClose, onSuccess, categories }) => {
       payload.append("variants", JSON.stringify(variants));
       if (image) payload.append("image", image);
 
-      await axios.post("http://localhost:3000/api/menu/addDish", payload, {
+      console.log(Object.fromEntries(payload.entries()));
+      await axios.post("http://localhost:3000/api/menu/addmenu", payload, {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       });
