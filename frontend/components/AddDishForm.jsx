@@ -90,7 +90,7 @@ const foodTypeOptions = [
 ];
 
 const AddDishForm = ({ onClose, onSuccess, categories }) => {
-  console.log(categories);
+ 
   const [dishName, setDishName] = useState("");
   const [description, setDescription] = useState("");
   const [foodType, setFoodType] = useState("Veg");
@@ -164,7 +164,7 @@ const AddDishForm = ({ onClose, onSuccess, categories }) => {
       payload.append("variants", JSON.stringify(variants));
       if (image) payload.append("image", image);
 
-      console.log(Object.fromEntries(payload.entries()));
+    
       await axios.post("http://localhost:3000/api/menu/addmenu", payload, {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },

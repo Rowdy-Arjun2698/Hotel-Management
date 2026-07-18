@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
 // Reusable custom dropdown — looks like the old select, but styleable
-const Dropdown = ({ value, onChange, options, width = "w-full" }) => {
+const Dropdown = ({ value,label, onChange, options, width = "w-full" }) => {
   const [open, setOpen] = useState(false);
   const rootRef = useRef(null);
 
@@ -18,7 +18,7 @@ const Dropdown = ({ value, onChange, options, width = "w-full" }) => {
   }, []);
 
   return (
-    <div className={`relative group ${width}`} ref={rootRef}>
+    <div className={`relative group ${width} ${open ? "z-50" : "z-10"} `} ref={rootRef}>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -29,7 +29,9 @@ const Dropdown = ({ value, onChange, options, width = "w-full" }) => {
                     focus:bg-white focus:ring-2 focus:ring-orange-300
                     ${open ? "bg-white ring-2 ring-orange-300 shadow-sm" : ""}`}
       >
-        <span className="truncate">{value}</span>
+       <span className="truncate">
+  {options.find((opt) => opt.value === value)?.label || "Select Category"}
+</span>
       </button>
 
       <ChevronDown
@@ -39,12 +41,14 @@ const Dropdown = ({ value, onChange, options, width = "w-full" }) => {
       />
 
       <div
-        className={`absolute z-20 left-0 right-0 mt-2 origin-top
-                    transition-all duration-150 ease-out
-                    ${open
-                      ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
-                      : "opacity-0 scale-95 -translate-y-1 pointer-events-none"}`}
-      >
+  className={`absolute z-50 left-0 right-0 mt-2 origin-top
+    transition-all duration-150 ease-out
+    ${
+      open
+        ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
+        : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
+    }`}
+>
         <ul
           role="listbox"
           className="max-h-64 overflow-auto rounded-2xl bg-white border border-gray-200
@@ -67,7 +71,7 @@ const Dropdown = ({ value, onChange, options, width = "w-full" }) => {
                               ? "bg-orange-50 text-orange-600 font-medium"
                               : "text-gray-700 hover:bg-gray-100"}`}
               >
-                <span className="truncate">{opt.value}</span>
+                <span className="truncate">{opt.label}</span>
                 {isSelected && <Check size={16} className="text-orange-500 shrink-0" />}
               </li>
             );
@@ -84,7 +88,7 @@ const Dropdown = ({ value, onChange, options, width = "w-full" }) => {
   );
 };
 
-const CategoryNav = ({ setopenform, refreshCategories,categories,setdish }) => {
+const CategoryNav = ({ setopenform, refreshCategories,categories,setdish,setselcat,setSearch,search }) => {
   const [mainCategory, setMainCategory] = useState("All");
 
   const [category, setCategory] = useState("");
@@ -97,7 +101,8 @@ const CategoryNav = ({ setopenform, refreshCategories,categories,setdish }) => {
 
 
   return (
-    <div className="bg-white rounded-2xl p-5 sticky m-3 shadow-sm ring-1 ring-black/5">
+<div className="bg-white  shadow-sm ring-1 ring-black/5 p-6 sticky top-0 z-40">
+
       <div className="flex flex-wrap items-end gap-5">
 
         {/* Search */}
@@ -114,6 +119,8 @@ const CategoryNav = ({ setopenform, refreshCategories,categories,setdish }) => {
             <input
               type="text"
               placeholder="Search dish..."
+              value={search}
+                 onChange={(e) => setSearch(e.target.value)}
               className="w-full h-12 rounded-full bg-gray-100 pl-11 pr-4 outline-none
                          transition-all duration-200 ease-out
                          hover:bg-gray-200/70
@@ -132,9 +139,9 @@ const CategoryNav = ({ setopenform, refreshCategories,categories,setdish }) => {
             value={mainCategory}
             onChange={setMainCategory}
             options={[
-              { key: "all", value: "All" },
-              { key: "food", value: "Food" },
-              { key: "beverages", value: "Beverages" },
+              { key: "all", value: "All", label:"All" },
+              { key: "food", value: "Food", label:"Food" },
+              { key: "beverages", value: "Beverages", label:"Beverages" },
             ]}
           />
         </div>
@@ -147,11 +154,22 @@ const CategoryNav = ({ setopenform, refreshCategories,categories,setdish }) => {
 
           <Dropdown
             value={category}
-            onChange={setCategory}
-            options={filteredCategories.map((cat) => ({
-              key: cat._id,
-              value: cat.Catname,
-            }))}
+           onChange={(value) => {
+        setCategory(value);          // update dropdown text
+        setselcat(value); 
+           }}
+            options={[
+  {
+    key: "all",
+    value: "",
+    label: "All",
+  },
+  ...filteredCategories.map((cat) => ({
+    key: cat._id,
+    value: cat._id,
+    label: cat.Catname,
+  })),
+]}
           />
         </div>
 

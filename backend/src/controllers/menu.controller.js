@@ -1,5 +1,7 @@
 const Menu=require("../models/menu.model")
 const catagoryModel = require("../models/catagory.model");
+const fs = require("fs");
+const path = require("path");
 
 async function addmenu(req, res) {
 
@@ -48,10 +50,10 @@ async function addmenu(req, res) {
 
 
             // Store uploaded image name
-            image: req.file ? req.file.filename : null,
+            //
 
             // OR store full relative path
-            // image: req.file ? `/uploads/hotel_${req.hotel._id}/dishes/${req.file.filename}` : null
+             image: req.file ? `/uploads/hotel_${req.hotel._id}/dishes/${req.file.filename}` : null
 
         };
 
@@ -176,9 +178,71 @@ async function fethAllmenu(req,res) {
 }
 
 
+
+async function deleteDish(req, res) {
+    if (!req.hotel) {
+        return res.status(401).json({
+            success: false,
+            message: "Login First"
+        });
+    }
+
+    const id = req.params.id;
+
+    if (!id) {
+        return res.status(400).json({
+            success: false,
+            message: "Make correct request"
+        });
+    }
+
+    try {
+
+        // Find the dish
+        const dish = await Menu.findOne({
+            _id: id,
+            hotelId: req.hotel._id
+        });
+
+        if (!dish) {
+            return res.status(404).json({
+                success: false,
+                message: "Dish not found"
+            });
+        }
+
+        // Delete image from uploads folder
+        if (dish.image) {
+            const imagePath = path.join(__dirname, "../../", dish.image);
+
+            if (fs.existsSync(imagePath)) {
+                fs.unlinkSync(imagePath);
+            }
+        }
+
+        // Delete dish from MongoDB
+        await Menu.findByIdAndDelete(id);
+
+        res.status(200).json({
+            success: true,
+            message: "Successfully deleted dish"
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            message: "Dish not deleted, something went wrong!"
+        });
+
+    }
+}
+
 module.exports={
     addmenu,
     showcat,
     addCat,
-    fethAllmenu
+    fethAllmenu,
+    deleteDish
 }
