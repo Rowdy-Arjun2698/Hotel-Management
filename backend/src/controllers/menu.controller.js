@@ -33,7 +33,7 @@ async function addmenu(req, res) {
         const parsedVariants = JSON.parse(req.body.variants);
 
         const menuData = {
-
+            _id:req.dishId,
             hotelId: req.hotel._id,
 
             dishName,
@@ -159,9 +159,9 @@ async function fethAllmenu(req,res) {
     }
     
     try {
-        const dishes = await Menu.find({
-  hotelId: req.hotel._id
-    })
+       const dishes = await Menu
+    .find({ hotelId: req.hotel._id })
+    .populate("categoryId");
     res.status(201).json({
         message:"All dishes fetched",
         success:true,
@@ -239,10 +239,158 @@ async function deleteDish(req, res) {
     }
 }
 
+async function updateDish(req, res) {
+
+    if (!req.hotel) {
+        return res.status(401).json({
+            success: false,
+            message: "Login First"
+        });
+    }
+
+    const { id } = req.params;
+
+    try {
+
+        // Find the dish belonging to this hotel
+        const dish = await Menu.findOne({
+            _id: id,
+            hotelId: req.hotel._id
+        });
+
+        if (!dish) {
+            return res.status(404).json({
+                success: false,
+                message: "Dish not found"
+            });
+        }
+
+        const {
+            dishName,
+            categoryId,
+            description,
+            foodType,
+            isAvailable,
+        } = req.body;
+
+        const parsedVariants = JSON.parse(req.body.variants);
+
+        // If a new image is uploaded
+        if (req.file) {
+
+            // Delete old image if it exists
+            if (dish.image) {
+
+                const imagePath = path.join(
+                    __dirname,
+                    "../../",
+                    dish.image.replace(/^[/\\]/, "")
+                );
+
+                if (fs.existsSync(imagePath)) {
+                    fs.unlinkSync(imagePath);
+                }
+            }
+
+            // Save new image path
+            dish.image = `/uploads/hotel_${req.hotel._id}/dishes/${req.file.filename}`;
+        }
+
+        // Update remaining fields
+        dish.dishName = dishName;
+        dish.categoryId = categoryId;
+        dish.description = description;
+        dish.foodType = foodType;
+        dish.isAvailable = isAvailable === "true";
+        dish.variants = parsedVariants;
+
+        await dish.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Dish updated successfully",
+            dish
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Error updating dish",
+            error: error.message
+        });
+
+    }
+}
+
+async function updateAvailable(req,res) {
+      if (!req.hotel) {
+        return res.status(401).json({
+            success: false,
+            message: "Login First"
+        });
+    }
+
+    const id = req.params.id;
+
+    if (!id) {
+        return res.status(400).json({
+            success: false,
+            message: "Make correct request"
+        });
+    }
+
+       const { isAvailable } = req.body;
+
+
+       try {
+
+        const dish = await Menu.findOneAndUpdate(
+            {
+                _id: id,
+                hotelId: req.hotel._id
+            },
+            {
+                isAvailable
+            },
+            {
+                    returnDocument: "after"
+            }
+        );
+
+        if (!dish) {
+            return res.status(404).json({
+                success: false,
+                message: "Dish not found"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Availability updated successfully",
+            dish
+        });
+
+    } catch (error) {
+
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong",
+            error: error.message
+        });
+
+    }
+    
+}
+
 module.exports={
     addmenu,
     showcat,
     addCat,
     fethAllmenu,
-    deleteDish
+    deleteDish,
+    updateDish,
+    updateAvailable
 }

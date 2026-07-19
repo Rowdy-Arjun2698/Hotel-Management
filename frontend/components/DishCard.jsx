@@ -146,7 +146,7 @@ const FoodTypeBadge = ({ foodType }) => {
 // ----------------------------------------------------------------------
 // Dish Card
 // ----------------------------------------------------------------------
-const DishCard = ({ dish,setdeldish,setdeletedish }) => {
+const DishCard = ({ dish,setdeldish,setdeletedish,setedit,setediteddish}) => {
   const {
     dishName = "Unnamed Dish",
     _id,
@@ -173,6 +173,33 @@ const DishCard = ({ dish,setdeldish,setdeletedish }) => {
    setdeletedish(true)
   }
 
+  const handelEdit=()=>{
+    setediteddish(dish)
+    setedit(true)
+  }
+
+const handleToggleAvailability = async () => {
+  try {
+    const response = await axios.patch(
+      `http://localhost:3000/api/menu/isAvailable/${_id}`,
+      {
+        isAvailable: !available,
+      },
+      {
+        withCredentials: true,
+      }
+    );
+
+    if (response.data.success) {
+      setAvailable(!available);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
+  
   return (
     <div className="bg-white rounded-2xl p-5 m-3 shadow-sm ring-1 ring-black/5 transition-shadow duration-200 hover:shadow-md">
       <div className="flex flex-wrap items-end gap-5">
@@ -244,7 +271,7 @@ const DishCard = ({ dish,setdeldish,setdeletedish }) => {
 
         {/* Availability */}
         <button
-          onClick={() => setAvailable((prev) => !prev)}
+          onClick={handleToggleAvailability}
           className={`h-12 px-6 rounded-full font-semibold flex items-center gap-2
           cursor-pointer transition-all duration-200 ease-out
           hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97]
@@ -264,6 +291,7 @@ const DishCard = ({ dish,setdeldish,setdeletedish }) => {
           font-semibold flex items-center gap-2 cursor-pointer
           transition-all duration-200 ease-out
           hover:bg-orange-200 hover:-translate-y-0.5"
+          onClick={handelEdit}
         >
           <Pencil size={18} />
           Edit

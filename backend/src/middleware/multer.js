@@ -1,11 +1,12 @@
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const mongoose = require("mongoose");
 
 const storage = multer.diskStorage({
 
     destination: function (req, file, cb) {
-
+         req.dishId = new mongoose.Types.ObjectId();
         // Comes from authHotel middleware
         const hotelId = req.hotel._id.toString();
 
@@ -26,7 +27,7 @@ const storage = multer.diskStorage({
 
         const extension = path.extname(file.originalname);
 
-        cb(null, req.body.dishName.trim() + extension);
+        cb(null, req.dishId.toString() + extension);
     }
 
 });

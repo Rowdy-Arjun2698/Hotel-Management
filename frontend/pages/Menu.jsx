@@ -6,6 +6,7 @@ import AddDishForm from '../components/AddDishForm';
 import axios from "axios";
 import DishCard from '../components/DishCard';
 import DeleteDishForm from '../components/DeleteDishForm';
+import EditDish from '../components/EditDish';
 
 const Menu = () => {
   const [openform,setopenform]=useState(false);
@@ -17,6 +18,9 @@ const Menu = () => {
   const [selcat,setselcat]=useState("");
   const [deldish,setdeldish]=useState({});
   const [deletedish,setdeletedish]=useState(false);
+  const[editdish,setedit]=useState(false);
+  const[editeddish,setediteddish]=useState({});
+  
 
   
   
@@ -75,8 +79,7 @@ async function deletethis(di) {
 
 const filteredDishes = dishes.filter((dish) => {
     const categoryMatch =
-        selcat === "" || dish.categoryId === selcat;
-
+    selcat === "" || dish.categoryId?._id === selcat;
     const searchMatch =
         dish.dishName.toLowerCase().includes(search.toLowerCase());
 
@@ -125,6 +128,23 @@ const filteredDishes = dishes.filter((dish) => {
   
 )}
 
+{editdish && (
+  <EditDish
+  categories={categories}
+   editeddish={editeddish}
+  onClose={() => setedit(false)}
+  onEdit={()=>{
+    editthis()
+  }}
+   onSuccess={() => {
+          setdish(false);
+          fetchAlldishes();
+          fetchAllCategory();
+        }}
+
+  />
+)}
+
     {openform && (
       <AddCatagoryForm
         onClose={() => setopenform(false)}
@@ -143,6 +163,8 @@ const filteredDishes = dishes.filter((dish) => {
             dish={dish}
             setdeldish={setdeldish}
             setdeletedish={setdeletedish}
+            setedit={setedit}
+            setediteddish={setediteddish}
           />
         ))
       ) : (

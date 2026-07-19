@@ -29,11 +29,11 @@ const menuSchema = new mongoose.Schema(
       trim: true,
     },
 
-      categoryId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Category",
-      required: true,
-    },
+     categoryId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "catagoryModel",
+    required: true,
+},
 
     description: {
       type: String,
@@ -60,12 +60,6 @@ const menuSchema = new mongoose.Schema(
       default: true,
     },
 
-    todayLimit: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
-
     todaySold: {
       type: Number,
       default: 0,
@@ -78,11 +72,6 @@ const menuSchema = new mongoose.Schema(
       min: 0,
     },
 
-    preparationTime: {
-      type: Number, // Minutes
-      default: 15,
-      min: 1,
-    },
   },
   {
     timestamps: true,
