@@ -6,13 +6,15 @@ import TableCard from "../components/TableCard";
 import TableForm from "../components/TableForm";
 import DeleteTable from "../components/DeleteTable";
 import TableNav from "../components/TableNav"
+import TableEdit from "../components/TableEdit";
 const Table = () => {
   const [open, setOpen] = useState(false);
   const [allTables, setAllTables] = useState([]);
   const [table,setTable]=useState(null);
   const [del,setdel]=useState(false);
   const [search, setSearch] = useState("");
-  
+  const [tb,settb]=useState(null);
+  const [tbopen,settbopen]=useState(false);
 
   async function fetchAllTables() {
     try {
@@ -79,6 +81,8 @@ const filteredTables = allTables.filter((table) =>
             tableData={card}
             openDelete={() => setdel(true)}
             setTable={setTable}
+            openEdit={()=>{settbopen(true)}}
+            settb={settb}
           />
         ))}
         <AddTable onClick={() => setOpen(true)} />
@@ -94,7 +98,18 @@ const filteredTables = allTables.filter((table) =>
       />
     )}
 
-  
+  {tbopen &&(
+    <TableEdit
+    table={tb}
+    onClose={()=>{
+      settbopen(false)
+    }}
+    onSuccess={ ()=>{
+settbopen(false)
+    }}
+    fetchAllTables={fetchAllTables}
+    />
+  )}
 
     {open && (
       <TableForm

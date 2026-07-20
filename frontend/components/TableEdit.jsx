@@ -1,8 +1,18 @@
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
-import { Hash, Users, MapPin, ChevronDown, Check, Snowflake, Sun, UtensilsCrossed } from "lucide-react";
+import {
+  Hash,
+  Users,
+  MapPin,
+  ChevronDown,
+  Check,
+  Snowflake,
+  Sun,
+  UtensilsCrossed,
+} from "lucide-react";
+import { PencilLine,Edit2 } from "lucide-react";
 
-// ---------- Dropdown ----------
+// ---------------- Dropdown ----------------
 const Dropdown = ({ value, label, onChange, options, width = "w-full" }) => {
   const [open, setOpen] = useState(false);
   const rootRef = useRef(null);
@@ -33,9 +43,9 @@ const Dropdown = ({ value, label, onChange, options, width = "w-full" }) => {
         className={`w-full h-12 rounded-lg bg-white border pl-4 pr-10 outline-none
                     text-left cursor-pointer
                     transition-all duration-200 ease-out
-                    hover:border-[#d2873a]/60
-                    focus:ring-2 focus:ring-orange-200
-                    ${open ? "border-[#d2873a] ring-2 ring-orange-200 shadow-sm" : "border-gray-300"}`}
+                    hover:border-indigo-500/60
+                    focus:ring-2 focus:ring-indigo-200
+                    ${open ? "border-indigo-500 ring-2 ring-indigo-200 shadow-sm" : "border-gray-300"}`}
       >
         <span className="flex items-center gap-2 truncate">
           {selected?.icon}
@@ -77,14 +87,14 @@ const Dropdown = ({ value, label, onChange, options, width = "w-full" }) => {
                 className={`flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl text-sm
                             cursor-pointer select-none transition-colors duration-150
                             ${isSelected
-                              ? "bg-orange-50 text-orange-600 font-medium"
+                              ? "bg-indigo-50 text-indigo-600 font-medium"
                               : "text-gray-700 hover:bg-gray-100"}`}
               >
                 <span className="flex items-center gap-2 truncate">
                   {opt.icon}
                   {opt.label}
                 </span>
-                {isSelected && <Check size={16} className="text-orange-500 shrink-0" />}
+                {isSelected && <Check size={16} className="text-indigo-500 shrink-0" />}
               </li>
             );
           })}
@@ -100,8 +110,8 @@ const Dropdown = ({ value, label, onChange, options, width = "w-full" }) => {
   );
 };
 
-// ---------- Table Form ----------
-const TableForm = ({ onClose, }) => {
+// ---------------- Table Edit Form ----------------
+const TableEdit = ({ table, onClose,fetchAllTables }) => {
   const [formData, setFormData] = useState({
     tableNumber: "",
     capacity: "",
@@ -109,26 +119,55 @@ const TableForm = ({ onClose, }) => {
     type: "AC",
   });
 
+  // Fill form when table changes
+  useEffect(() => {
+    if (table) {
+      setFormData({
+        tableNumber: table.tableNumber || "",
+        capacity: table.capacity || "",
+        location: table.location || "",
+        type: table.type || "AC",
+      });
+    }
+  }, [table]);
+
+  const typeOptions = [
+    {
+      value: "AC",
+      label: "AC",
+      icon: <Snowflake size={16} className="text-sky-500" />,
+    },
+    {
+      value: "Non-AC",
+      label: "Non-AC",
+      icon: <UtensilsCrossed size={16} className="text-gray-500" />,
+    },
+    {
+      value: "Outdoor",
+      label: "Outdoor",
+      icon: <Sun size={16} className="text-indigo-500" />,
+    },
+  ];
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // axios call
     try {
-      await axios.post('http://localhost:3000/api/table/addtable', formData, {
-        withCredentials: true,
-      });
-      console.log("Table Created");
-      onClose(); // close modal only after success
+      await axios.put(
+        `http://localhost:3000/api/table/updatetable/${table._id}`,
+        formData,
+        {
+          withCredentials: true,
+        }
+      );
+
+      console.log("Table Updated Successfully");
+      fetchAllTables()
+      onClose();
     } catch (error) {
-      console.error("Error creating table:", error);
+      console.error(error);
     }
   };
-
-  const typeOptions = [
-    { value: "AC", label: "AC", icon: <Snowflake size={16} className="text-sky-500" /> },
-    { value: "Non-AC", label: "Non-AC", icon: <UtensilsCrossed size={16} className="text-gray-500" /> },
-    { value: "Outdoor", label: "Outdoor", icon: <Sun size={16} className="text-amber-500" /> },
-  ];
 
   return (
     <div
@@ -139,115 +178,131 @@ const TableForm = ({ onClose, }) => {
         onClick={(e) => e.stopPropagation()}
         className="w-[500px] bg-white rounded-2xl shadow-2xl p-8"
       >
-        <div className="mb-6">
-  <div className="flex items-center gap-3">
-    <div className="w-10 h-10 rounded-xl bg-[#fbe9d7] flex items-center justify-center">
-      <svg
-        className="w-5 h-5 text-[#d2873a]"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={2}
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M12 4v16m8-8H4"
-        />
-      </svg>
-    </div>
+       <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
+              <PencilLine className="w-5 h-5 text-indigo-500" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-800">Edit Dish</h1>
+          </div>
 
-    <h1 className="text-2xl font-bold text-gray-800">
-      Add New Table
-    </h1>
-  </div>
-
-  <p className="text-sm text-gray-400 mt-2">
-    Fill in the details to create a new dining table
-  </p>
-</div>
-
+          <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-xs font-semibold">
+            <Edit2 size={12} />
+            Editing
+          </span>
+        </div>
+        <p className="text-sm text-gray-400 mb-6 ml-[52px]">
+          Update the details of the selected Table
+        </p>
         <form onSubmit={handleSubmit}>
           <div className="space-y-5">
-
+            {/* Table Number */}
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1.5">
                 Table Number
               </label>
+
               <div className="relative">
-                <Hash size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Hash
+                  size={16}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                />
+
                 <input
                   type="number"
-                  placeholder="e.g. 12"
-                  className="w-full border border-gray-300 rounded-lg p-3 pl-11 outline-none
-                             transition-colors duration-200
-                             focus:border-[#d2873a] focus:ring-2 focus:ring-orange-200"
+                  className="w-full border border-gray-300 rounded-lg p-3 pl-11 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
                   value={formData.tableNumber}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, tableNumber: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      tableNumber: e.target.value,
+                    })
+                  }
                 />
               </div>
             </div>
 
+            {/* Capacity */}
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1.5">
                 Capacity
               </label>
+
               <div className="relative">
-                <Users size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Users
+                  size={16}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                />
+
                 <input
                   type="number"
-                  placeholder="Number of seats"
-                  className="w-full border border-gray-300 rounded-lg p-3 pl-11 outline-none
-                             transition-colors duration-200
-                             focus:border-[#d2873a] focus:ring-2 focus:ring-orange-200"
+                  className="w-full border border-gray-300 rounded-lg p-3 pl-11 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
                   value={formData.capacity}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, capacity: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      capacity: e.target.value,
+                    })
+                  }
                 />
               </div>
             </div>
 
+            {/* Location */}
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1.5">
                 Location / Floor
               </label>
+
               <div className="relative">
-                <MapPin size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <MapPin
+                  size={16}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                />
+
                 <input
                   type="text"
-                  placeholder="e.g. Ground Floor, Terrace"
-                  className="w-full border border-gray-300 rounded-lg p-3 pl-11 outline-none
-                             transition-colors duration-200
-                             focus:border-[#d2873a] focus:ring-2 focus:ring-orange-200"
+                  className="w-full border border-gray-300 rounded-lg p-3 pl-11 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
                   value={formData.location}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, location: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      location: e.target.value,
+                    })
+                  }
                 />
               </div>
             </div>
 
+            {/* Seating Type */}
             <Dropdown
               label="Seating Type"
               value={formData.type}
-              onChange={(val) => setFormData((prev) => ({ ...prev, type: val }))}
+              onChange={(value) =>
+                setFormData({
+                  ...formData,
+                  type: value,
+                })
+              }
               options={typeOptions}
             />
-
           </div>
 
           <div className="flex justify-end gap-3 mt-8">
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors duration-200 cursor-pointer"
+              className="px-6 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 cursor-pointer"
             >
               Cancel
             </button>
 
             <button
               type="submit"
-              className="px-6 py-2.5 rounded-lg bg-[#d2873a] text-white hover:bg-[#b9752e] shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
-
+               className="px-6 py-2 rounded-lg bg-indigo-500 text-white hover:bg-indigo-600 active:scale-95 transition-all duration-150 cursor-pointer font-medium shadow-md shadow-indigo-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Add Table
+            
+              Save Changes
             </button>
           </div>
         </form>
@@ -256,4 +311,4 @@ const TableForm = ({ onClose, }) => {
   );
 };
 
-export default TableForm;
+export default TableEdit;

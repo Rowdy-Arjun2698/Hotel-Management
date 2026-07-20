@@ -19,8 +19,8 @@ const tableSchema=new mongoose.Schema({
         required:true
     },
     status:{
-        type:String,
-        default:"available"
+        type:Boolean,
+        default:true
     },
     hotelId:{
         type:mongoose.Schema.Types.ObjectId,

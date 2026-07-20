@@ -29,11 +29,11 @@ const typeStyles = {
   },
 };
 
-const TableCard = ({ tableData,openDelete,setTable }) => {
+const TableCard = ({ tableData,openDelete,setTable,settb,openEdit }) => {
   console.log(tableData.qr);
   const [openQR, setOpenQR] = useState(false);
 
-  const isAvailable = tableData.status === "Available";
+  const isAvailable = tableData.status;
   const typeStyle = typeStyles[tableData.type] || {
     icon: <IoOptions className="text-sm" />,
     className: "bg-gray-100 text-gray-600",
@@ -41,6 +41,10 @@ const TableCard = ({ tableData,openDelete,setTable }) => {
 const handledel=()=>{
   setTable(tableData)
   openDelete()
+}
+const handleEdit=()=>{
+  settb(tableData)
+ openEdit();
 }
   return (
     <div className="w-[250px] h-[250px] rounded-2xl bg-sky-50 border-1 border-gray-300 shadow-lg hover:shadow-2xl transition-all duration-300 p-5 flex flex-col m-4 justify-between">
@@ -54,8 +58,8 @@ const handledel=()=>{
           </h2>
         </div>
 
-        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${tableData.status === "Available" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-          {tableData.status}
+        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${tableData.status==true ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+          {tableData.status==true? "Available":"Unavaialble"}
         </span>
       </div>
 
@@ -104,7 +108,9 @@ const handledel=()=>{
         )}
 
         <div className="flex gap-2">
-          <button className="flex-1 flex justify-center items-center bg-gray-100 rounded-lg py-2 hover:bg-gray-200 cursor-pointer transition">
+          <button className="flex-1 flex justify-center items-center bg-gray-100 rounded-lg py-2 hover:bg-gray-200 cursor-pointer transition"
+          onClick={handleEdit} 
+          >
             <MdEdit />
           </button>
 

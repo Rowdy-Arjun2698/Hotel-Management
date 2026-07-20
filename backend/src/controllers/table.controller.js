@@ -155,9 +155,68 @@ async function deleteTable(req,res) {
 
     
 }
+//............update table.............................
+async function updatetb(req, res) {
+    if (!req.hotel) {
+        return res.status(401).json({
+            success: false,
+            message: "Login First"
+        });
+    }
 
+    const { id } = req.params;
+
+    const {
+        tableNumber,
+        capacity,
+        location,
+        type
+    } = req.body;
+
+    if (!tableNumber || !capacity || !location || !type) {
+        return res.status(400).json({
+            success: false,
+            message: "All fields are required"
+        });
+    }
+
+    try {
+        const table = await Table.findOne({
+            _id: id,
+            hotelId: req.hotel._id
+        });
+
+        if (!table) {
+            return res.status(404).json({
+                success: false,
+                message: "Table not found"
+            });
+        }
+
+        table.tableNumber = tableNumber;
+        table.capacity = capacity;
+        table.location = location;
+        table.type = type;
+
+        await table.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Table updated successfully",
+            table
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Error updating table",
+            error: error.message
+        });
+    }
+}
 module.exports={
     addtables,
     gettables,
-    deleteTable
+    deleteTable,
+    updatetb
 }
