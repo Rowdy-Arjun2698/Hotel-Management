@@ -8,6 +8,7 @@ import TableForm from "../components/TableForm";
 const Table = () => {
   const [open, setOpen] = useState(false);
   const [allTables, setAllTables] = useState([]);
+  
 
   async function fetchAllTables() {
     try {
@@ -31,7 +32,7 @@ const Table = () => {
   useEffect(() => {
     fetchAllTables();
    
-  }, [allTables]);
+  }, []);
 
   return (
     <div className="w-full h-full bg-white flex flex-wrap gap-5 overflow-y-auto">
@@ -47,7 +48,12 @@ const Table = () => {
         setOpen(true)}} />
 
       {open && (
-        <TableForm onClose={() => setOpen(false)} />
+        <TableForm 
+        onClose={() => {setOpen(false)
+          fetchAllTables()}
+        }
+       
+        />
       )}
 
     </div>

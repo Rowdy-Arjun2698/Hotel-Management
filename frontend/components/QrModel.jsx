@@ -4,11 +4,19 @@ const QrModel = ({ qr, tableNumber, onClose }) => {
     console.log(qr)
     console.log(tableNumber)
     console.log(onClose)
-    const downloadQR = () => {
+    const downloadQR = async () => {
+  const response = await fetch(`http://localhost:3000/${qr}`);
+  const blob = await response.blob();
+
+  const url = window.URL.createObjectURL(blob);
+
   const link = document.createElement("a");
-  link.href = `http://localhost:3000/${qr}`;
+  link.href = url;
   link.download = `Table-${tableNumber}-QR.png`;
   link.click();
+
+  window.URL.revokeObjectURL(url);
+  onClose()
 };
   return (
     <div
