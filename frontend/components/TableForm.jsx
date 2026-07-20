@@ -101,7 +101,7 @@ const Dropdown = ({ value, label, onChange, options, width = "w-full" }) => {
 };
 
 // ---------- Table Form ----------
-const TableForm = ({ onClose,onSuccess }) => {
+const TableForm = ({ onClose, }) => {
   const [formData, setFormData] = useState({
     tableNumber: "",
     capacity: "",
@@ -226,7 +226,7 @@ const TableForm = ({ onClose,onSuccess }) => {
             <button
               type="submit"
               className="px-6 py-2.5 rounded-lg bg-[#d2873a] text-white hover:bg-[#b9752e] shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
-              onClick={onSuccess}
+
             >
               Add Table
             </button>

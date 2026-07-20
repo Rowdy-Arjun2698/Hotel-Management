@@ -29,7 +29,7 @@ const typeStyles = {
   },
 };
 
-const TableCard = ({ tableData }) => {
+const TableCard = ({ tableData,openDelete,setTable }) => {
   console.log(tableData.qr);
   const [openQR, setOpenQR] = useState(false);
 
@@ -38,7 +38,10 @@ const TableCard = ({ tableData }) => {
     icon: <IoOptions className="text-sm" />,
     className: "bg-gray-100 text-gray-600",
   };
-
+const handledel=()=>{
+  setTable(tableData)
+  openDelete()
+}
   return (
     <div className="w-[250px] h-[250px] rounded-2xl bg-sky-50 border-1 border-gray-300 shadow-lg hover:shadow-2xl transition-all duration-300 p-5 flex flex-col m-4 justify-between">
 
@@ -105,7 +108,9 @@ const TableCard = ({ tableData }) => {
             <MdEdit />
           </button>
 
-          <button className="flex-1 flex justify-center items-center bg-red-100 text-red-600 rounded-lg py-2 hover:bg-red-200 cursor-pointer transition">
+          <button className="flex-1 flex justify-center items-center bg-red-100 text-red-600 rounded-lg py-2 hover:bg-red-200 cursor-pointer transition"
+          onClick={handledel}
+          >
             <MdDelete />
           </button>
         </div>

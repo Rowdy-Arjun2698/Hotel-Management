@@ -95,7 +95,69 @@ try {
 
 }
 
+//delete table .....
+async function deleteTable(req,res) {
+     if (!req.hotel) {
+        return res.status(401).json({
+            success: false,
+            message: "Login First"
+        });
+    }
+  const id = req.params.id;
+  if(!id){
+    return res.status(400).json({
+        success:false,
+        message:"Invalid Table data !!"
+
+    })
+  }
+ try {
+
+        // Find the dish
+        const table = await Table.findOne({
+            _id: id,
+            hotelId: req.hotel._id
+        });
+
+        if (!table) {
+            return res.status(404).json({
+                success: false,
+                message: "Dish not found"
+            });
+        }
+
+        // Delete image from uploads folder
+        if (table.qr) {
+            const qrpath = path.join(__dirname, "../../", table.qr);
+
+            if (fs.existsSync(qrpath)) {
+                fs.unlinkSync(qrpath);
+            }
+        }
+
+        // Delete dish from MongoDB
+        await Table.findByIdAndDelete(id);
+
+        res.status(200).json({
+            success: true,
+            message: "Successfully deleted table"
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            message: "Table not deleted, something went wrong!"
+        });
+
+    }
+
+    
+}
+
 module.exports={
     addtables,
-    gettables
+    gettables,
+    deleteTable
 }
