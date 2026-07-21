@@ -6,6 +6,10 @@ import Home from "../pages/Home";
 import Settings from "../pages/Settings";
 import Table from "../pages/Table";
 import Menu from "../pages/Menu"
+import CustomerLayout from "../layout/CustomerLayouts";
+import Welcome from "../components/Welcome";
+   import { CustomerProvider } from "../context/CustomerContext";
+import CustMenu from "../pages/CustMenu";
 
 const router=createBrowserRouter([
     {
@@ -38,7 +42,35 @@ const router=createBrowserRouter([
         element: <Menu/>
       }
     ]
-  }
+  },
+
+  {
+  path: "/customer/:tableId",
+  element: (
+    <CustomerProvider>
+      <CustomerLayout />
+    </CustomerProvider>
+  ),
+  children: [
+    {
+      index: true,
+      element: <Welcome />
+    },
+    {
+      path: "Cmenu",
+      element: <CustMenu />
+    },
+    // {
+    //   path: "cart",
+    //   element: <Cart />
+    // },
+    // {
+    //   path: "orders",
+    //   element: <Orders />
+    // }
+  
+  ]
+}
 ])
 
 export default router

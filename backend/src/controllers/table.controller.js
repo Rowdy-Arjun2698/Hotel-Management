@@ -34,7 +34,7 @@ try {
         });
 
         const tableid=table._id;
-        const url=`http://localhost:5173/customer/${tableid}`;
+        const url=`${process.env.FRONTEND_URL}/customer/${tableid}`;
 
        const qrFolder = path.join(
     __dirname,

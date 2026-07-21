@@ -4,16 +4,15 @@ const cookieParser=require("cookie-parser");
 const authRoute=require("./routes/auth.routes")
 const tableRoute=require("./routes/table.routes")
 const menuRoute=require("./routes/menu.routes")
+const customerRoute=require("./routes/customer.routes")
 const path=require("path")
 const cors=require("cors")
 const app=express();
 
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-  })
-);
+app.use(cors({
+    origin:true,
+    credentials:true
+}));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -27,4 +26,5 @@ app.get("/",(req,res)=>{
 app.use("/api/hotel",authRoute);
 app.use("/api/table",tableRoute);
 app.use("/api/menu",menuRoute)
+app.use("/api/customer",customerRoute);
 module.exports=app;
