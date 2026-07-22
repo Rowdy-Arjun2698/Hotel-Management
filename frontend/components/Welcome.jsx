@@ -16,7 +16,7 @@ if(!hotel || !table){
     return <Loader message="Loading restaurant..." />;
 }
 
-const url=`/customer/${table._id}/cmenu`
+const urlk=`/customer/${table._id}/cmenu`
 
 const tablenum = table.tableNumber;
 const outlet = `${hotel.address}, ${hotel.city}`;
@@ -99,7 +99,7 @@ const outlet = `${hotel.address}, ${hotel.city}`;
 
         {/* CTA */}
         <button
-          onClick={() => navigate(url)}
+          onClick={() => navigate(urlk)}
           className={`mt-8 flex w-full items-center justify-center gap-2 rounded-full bg-red-700 py-3.5 text-sm font-semibold text-white shadow-md shadow-red-200 transition-all duration-700 delay-300 ease-out active:scale-[0.98] ${
             mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
           }`}

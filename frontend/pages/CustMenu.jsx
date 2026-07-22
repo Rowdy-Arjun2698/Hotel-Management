@@ -11,6 +11,7 @@ const CustMenu = () => {
   const {url}=useContext(CustomerContext);
   const [selcat,setselcat]=useState("");
   const [searcher,setsearcher]=useState("");
+  const [food,setfood]=useState("");
 
 
   const fetchMenu = async () => {
@@ -39,9 +40,12 @@ const CustMenu = () => {
   selcat === "" || dish.categoryId === selcat;
     const searchMatch =
         dish.dishName.toLowerCase().includes(searcher.toLowerCase());
+    const foodmatch=
+    food === "" || dish.foodType === food;
 
-    return categoryMatch && searchMatch;
+    return categoryMatch && searchMatch && foodmatch;
 }); 
+
 
 
 
@@ -59,6 +63,7 @@ useEffect(()=>{
     categories={categories}
     setselcat={setselcat}
     setsearcher={setsearcher}
+    setfood={setfood}
     />
     <div className="mt-6 flex flex-col gap-2">
       {filteredDishes.length > 0 ? (

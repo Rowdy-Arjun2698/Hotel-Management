@@ -152,7 +152,7 @@ const Dropdown = ({ value, onChange, options, placeholder = "Select" }) => {
   );
 };
 
-const CusMenuNav = ({ categories = [],setselcat,setsearcher}) => {
+const CusMenuNav = ({ categories = [],setselcat,setsearcher,setfood}) => {
   const [mainCategory, setMainCategory] = useState("");
   const [category, setCategory] = useState("");
   const [foodType, setFoodType] = useState("all");
@@ -237,7 +237,19 @@ const CusMenuNav = ({ categories = [],setselcat,setsearcher}) => {
             <button
               key={type.value}
               type="button"
-              onClick={() => setFoodType(type.value)}
+              onClick={() => {
+  setFoodType(type.value);
+
+  if (type.value === "all") {
+    setfood("");
+  } else if (type.value === "veg") {
+    setfood("Veg");
+  } else if (type.value === "egg") {
+    setfood("Egg");
+  } else if (type.value === "nonveg") {
+    setfood("Non-Veg");
+  }
+}}
               className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium
                           transition-all duration-200 ease-out active:scale-95
                           ${
