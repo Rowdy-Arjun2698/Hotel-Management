@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Search, SlidersHorizontal, ChevronDown, Check } from "lucide-react";
 
 const foodTypes = [
@@ -34,13 +35,21 @@ const FoodTypeMark = ({ type }) => {
 };
 
 // Compact pill dropdown — mobile-friendly version of the PC dropdown
+// Menu is rendered via a portal directly onto <body>, so it always
+// escapes any parent's overflow-x-auto / sticky clipping.
 const Dropdown = ({ value, onChange, options, placeholder = "Select" }) => {
   const [open, setOpen] = useState(false);
+  const [coords, setCoords] = useState({ top: 0, left: 0 });
   const rootRef = useRef(null);
+  const btnRef = useRef(null);
 
   useEffect(() => {
     function handleClick(e) {
-      if (rootRef.current && !rootRef.current.contains(e.target)) {
+      if (
+        rootRef.current &&
+        !rootRef.current.contains(e.target) &&
+        !e.target.closest("[data-dropdown-menu]")
+      ) {
         setOpen(false);
       }
     }
@@ -48,13 +57,40 @@ const Dropdown = ({ value, onChange, options, placeholder = "Select" }) => {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
+  // Reposition on scroll/resize while open, so the menu tracks the button
+  useEffect(() => {
+    if (!open) return;
+    function updatePosition() {
+      if (btnRef.current) {
+        const rect = btnRef.current.getBoundingClientRect();
+        setCoords({ top: rect.bottom + window.scrollY + 8, left: rect.left + window.scrollX });
+      }
+    }
+    updatePosition();
+    window.addEventListener("scroll", updatePosition, true);
+    window.addEventListener("resize", updatePosition);
+    return () => {
+      window.removeEventListener("scroll", updatePosition, true);
+      window.removeEventListener("resize", updatePosition);
+    };
+  }, [open]);
+
+  const toggleOpen = () => {
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      setCoords({ top: rect.bottom + window.scrollY + 8, left: rect.left + window.scrollX });
+    }
+    setOpen((o) => !o);
+  };
+
   const selectedLabel = options.find((opt) => opt.value === value)?.label;
 
   return (
-    <div className={`relative shrink-0 ${open ? "z-50" : "z-10"}`} ref={rootRef}>
+    <div className="relative shrink-0" ref={rootRef}>
       <button
+        ref={btnRef}
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={toggleOpen}
         className={`flex h-10 items-center gap-2 whitespace-nowrap rounded-full border px-4 pr-3 text-sm font-medium
                     outline-none transition-all duration-200 ease-out
                     ${
@@ -72,62 +108,60 @@ const Dropdown = ({ value, onChange, options, placeholder = "Select" }) => {
         />
       </button>
 
-      <div
-        className={`absolute left-0 z-50 mt-2 w-48 origin-top-left
-          transition-all duration-150 ease-out
-          ${
-            open
-              ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
-              : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
-          }`}
-      >
-        <ul
-          role="listbox"
-          className="max-h-64 overflow-auto rounded-2xl border border-gray-200 bg-white p-1.5
-                     shadow-lg shadow-gray-900/10"
-        >
-          {options.map((opt) => {
-            const isSelected = opt.value === value;
-            return (
-              <li
-                key={opt.key}
-                role="option"
-                aria-selected={isSelected}
-                onClick={() => {
-                  onChange(opt.value);
-                  setOpen(false);
-                }}
-                className={`flex items-center justify-between gap-2 rounded-xl px-3.5 py-2.5 text-sm
-                            cursor-pointer select-none transition-colors duration-150
-                            ${
-                              isSelected
-                                ? "bg-orange-50 font-medium text-orange-600"
-                                : "text-gray-700 hover:bg-gray-100"
-                            }`}
-              >
-                <span className="truncate">{opt.label}</span>
-                {isSelected && <Check size={16} className="shrink-0 text-orange-500" />}
-              </li>
-            );
-          })}
+      {open &&
+        createPortal(
+          <ul
+            data-dropdown-menu
+            role="listbox"
+            style={{ position: "absolute", top: coords.top, left: coords.left }}
+            className="z-50 w-48 max-h-64 overflow-auto rounded-2xl border border-gray-200 bg-white p-1.5
+                       shadow-lg shadow-gray-900/10"
+          >
+            {options.map((opt) => {
+              const isSelected = opt.value === value;
+              return (
+                <li
+                  key={opt.key}
+                  role="option"
+                  aria-selected={isSelected}
+                  onClick={() => {
+                    onChange(opt.value);
+                    setOpen(false);
+                  }}
+                  className={`flex items-center justify-between gap-2 rounded-xl px-3.5 py-2.5 text-sm
+                              cursor-pointer select-none transition-colors duration-150
+                              ${
+                                isSelected
+                                  ? "bg-orange-50 font-medium text-orange-600"
+                                  : "text-gray-700 hover:bg-gray-100"
+                              }`}
+                >
+                  <span className="truncate">{opt.label}</span>
+                  {isSelected && <Check size={16} className="shrink-0 text-orange-500" />}
+                </li>
+              );
+            })}
 
-          {options.length === 0 && (
-            <li className="px-4 py-3 text-center text-sm text-gray-400">No categories found</li>
-          )}
-        </ul>
-      </div>
+            {options.length === 0 && (
+              <li className="px-4 py-3 text-center text-sm text-gray-400">No categories found</li>
+            )}
+          </ul>,
+          document.body
+        )}
     </div>
   );
 };
 
-const CusMenuNav = ({ categories = [] }) => {
-  const [mainCategory, setMainCategory] = useState("All");
+const CusMenuNav = ({ categories = [],setselcat,setsearcher}) => {
+  const [mainCategory, setMainCategory] = useState("");
   const [category, setCategory] = useState("");
   const [foodType, setFoodType] = useState("all");
   const [search, setSearch] = useState("");
 
   const filteredCategories =
-    mainCategory === "All" ? categories : categories.filter((cat) => cat.mainCategory === mainCategory);
+    mainCategory === "" ? categories : categories.filter((cat) => cat.mainCategory === mainCategory);
+
+
 
   return (
     <div className="sticky top-0 z-30 bg-white px-4 pb-2 pt-3">
@@ -140,8 +174,11 @@ const CusMenuNav = ({ categories = [] }) => {
           />
           <input
             type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+             value={search}
+  onChange={(e) => {
+    setSearch(e.target.value);
+    setsearcher(e.target.value);
+  }}
             placeholder="Search for dishes..."
             className="h-11 w-full rounded-full bg-orange-50/70 pl-11 pr-4 text-sm text-slate-700
                        outline-none placeholder:text-slate-400
@@ -164,19 +201,22 @@ const CusMenuNav = ({ categories = [] }) => {
       {/* Dropdown row: Main category + Category, both compact pills */}
       <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <Dropdown
+          onChange={(value)=>{setMainCategory(value)}}
           value={mainCategory}
-          onChange={setMainCategory}
           placeholder="Main category"
           options={[
-            { key: "all", value: "All", label: "All" },
+            { key: "all", value: "", label: "All" },
             { key: "food", value: "Food", label: "Food" },
             { key: "beverages", value: "Beverages", label: "Beverages" },
           ]}
         />
 
         <Dropdown
-          value={category}
-          onChange={(value) => setCategory(value)}
+           value={category}
+  onChange={(value) => {
+    setCategory(value);
+    setselcat(value);
+  }}
           placeholder="Category"
           options={[
             { key: "all", value: "", label: "All" },

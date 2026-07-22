@@ -1,20 +1,20 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink,useParams } from "react-router-dom";
 import { useContext } from "react";
 import { UtensilsCrossed, Receipt, ConciergeBell, MoreHorizontal } from "lucide-react";
 import { CustomerContext } from "../context/CustomerContext";
-
+import Loader from "../components/Loader"
 
 
 const BottomNav = () => {
-     const {hotel, table}=useContext(CustomerContext);
 
+  const tableId=useParams();
 
-if(!hotel || !table){
+if(!tableId){
     return <Loader message="Loading restaurant..." />;
 }
 const navItems = [
-  { to: `/customer/${table._id}/cmenu`, label: "Menu", icon: UtensilsCrossed, end: true },
+  { to: `/customer/${tableId}/cmenu`, label: "Menu", icon: UtensilsCrossed, end: true },
   { to: "/orders", label: "Orders", icon: Receipt },
   { to: "/call-waiter", label: "Call Waiter", icon: ConciergeBell },
   { to: "/more", label: "More", icon: MoreHorizontal },
