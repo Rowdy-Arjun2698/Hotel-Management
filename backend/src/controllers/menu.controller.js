@@ -1,7 +1,9 @@
 const Menu=require("../models/menu.model")
 const catagoryModel = require("../models/catagory.model");
+const { getIO } = require("../socket/socket");
 const fs = require("fs");
 const path = require("path");
+
 
 async function addmenu(req, res) {
 
@@ -360,12 +362,22 @@ async function updateAvailable(req,res) {
             }
         );
 
+
+               
+
+
         if (!dish) {
             return res.status(404).json({
                 success: false,
                 message: "Dish not found"
             });
         }
+
+        const io = getIO();
+          io.to(`hotel_${req.hotel._id}`).emit("dishAvailabilityChanged", {
+    dishId: dish._id.toString(),
+    isAvailable: dish.isAvailable,
+});
 
         return res.status(200).json({
             success: true,

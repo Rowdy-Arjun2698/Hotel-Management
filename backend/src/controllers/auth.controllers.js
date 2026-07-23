@@ -162,10 +162,37 @@ async function hotellogout(req,res) {
     
 }
 
+async function fetcher(req,res) {
+    const user=req.hotel;
+    
+    if(!user){
+      return res.status(401).json({
+        success:false,
+        message:"Hotel is not registered !!"
+      })  
+    }
+    
+    try {
+        res.status(201).json({
+            success:true,
+            message:"done ",
+            user
+        })
+    } catch (error) {
+        res.status(500).json({
+            success:false,
+            message:"something error",
+            error:error.message
+        })
+        
+    }
+    
+}
 
 module.exports={
     registerhotel,
     hotellogin,
-    hotellogout
+    hotellogout,
+    fetcher
 
 }
