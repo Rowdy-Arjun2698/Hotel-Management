@@ -2,6 +2,7 @@ import React from "react";
 import DeleteTable from "../components/DeleteTable";
 import TableEdit from "../components/TableEdit";
 import CusDishCard from "../components/CusDishCard";
+import ToasterDemo from "../components/Toaster";
 
 const Settings = () => {
   const deltable = {
@@ -19,7 +20,7 @@ const Settings = () => {
 
   return (
     <div className="w-screen h-screen bg-gray-200 flex items-center justify-center">
-   
+   <ToasterDemo/>
     </div>
   );
 };

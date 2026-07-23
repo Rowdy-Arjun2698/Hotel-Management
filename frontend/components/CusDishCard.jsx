@@ -69,7 +69,7 @@ const FoodTypeMark = ({ type, dim = false }) => {
 
   return (
     <span
-      className={`flex h-3.5 w-3.5 items-center justify-center rounded-[3px] border-[1.5px] ${
+      className={`flex h-3 w-3 items-center justify-center rounded-[3px] border-[1.5px] ${
         border[type]
       } ${dim ? "opacity-50" : ""}`}
     >
@@ -149,7 +149,7 @@ const CusDishCard = ({ dish, onAdd, imageBaseUrl = "" }) => {
 
   return (
     <div
-      className={`relative w-full max-w-2xl rounded-2xl border p-3 flex gap-4 items-stretch transition-shadow ${
+      className={`relative w-full max-w-2xl rounded-xl border p-2 flex gap-3 items-stretch transition-shadow ${
         isAvailable
           ? "bg-white border-gray-100 shadow-sm hover:shadow-md"
           : "bg-gray-50 border-gray-100"
@@ -160,13 +160,13 @@ const CusDishCard = ({ dish, onAdd, imageBaseUrl = "" }) => {
         <img
           src={`http://localhost:3000${dish.image}`}
           alt={dish.dishName}
-          className={`w-28 h-28 sm:w-32 sm:h-32 rounded-xl object-cover ${
+          className={`w-20 h-20 sm:w-24 sm:h-24 rounded-lg object-cover ${
             isAvailable ? "" : "grayscale opacity-60"
           }`}
         />
         {!isAvailable && (
-          <div className="absolute inset-0 rounded-xl bg-black/5 flex items-end justify-center pb-1.5">
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-white bg-gray-500/90 px-2 py-0.5 rounded-full">
+          <div className="absolute inset-0 rounded-lg bg-black/5 flex items-end justify-center pb-1">
+            <span className="text-[9px] font-semibold uppercase tracking-wide text-white bg-gray-500/90 px-1.5 py-0.5 rounded-full">
               Sold out
             </span>
           </div>
@@ -176,11 +176,11 @@ const CusDishCard = ({ dish, onAdd, imageBaseUrl = "" }) => {
       {/* Content */}
       <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
         <div>
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-1.5 mb-0.5">
             <FoodTypeMark type={foodTypeKey} dim={!isAvailable} />
             {dish.categoryId?.Catname && (
               <span
-                className={`text-xs font-medium px-1.5 py-0.5 rounded ${
+                className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
                   isAvailable
                     ? "text-gray-500 bg-gray-100"
                     : "text-gray-400 bg-gray-100"
@@ -192,14 +192,14 @@ const CusDishCard = ({ dish, onAdd, imageBaseUrl = "" }) => {
           </div>
 
           <h3
-            className={`text-base sm:text-lg font-semibold leading-tight truncate ${
+            className={`text-sm sm:text-base font-semibold leading-tight truncate ${
               isAvailable ? "text-[#151514]" : "text-gray-400"
             }`}
           >
             {dish.dishName}
           </h3>
           <p
-            className={`text-sm mt-1 line-clamp-2 ${
+            className={`text-xs mt-0.5 line-clamp-1 ${
               isAvailable ? "text-gray-500" : "text-gray-400"
             }`}
           >
@@ -207,7 +207,7 @@ const CusDishCard = ({ dish, onAdd, imageBaseUrl = "" }) => {
           </p>
         </div>
 
-        <div className="flex items-end justify-between mt-2">
+        <div className="flex items-end justify-between mt-1">
           <p
             className={`text-sm font-semibold ${
               isAvailable ? "text-[#151514]" : "text-gray-400"
@@ -222,7 +222,7 @@ const CusDishCard = ({ dish, onAdd, imageBaseUrl = "" }) => {
             <button
               onClick={() => isAvailable && setOpen((o) => !o)}
               disabled={!isAvailable}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold border-2 transition-colors ${
+              className={`flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold border-2 transition-colors ${
                 !isAvailable
                   ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
                   : totalCount > 0
@@ -234,12 +234,12 @@ const CusDishCard = ({ dish, onAdd, imageBaseUrl = "" }) => {
                 "UNAVAILABLE"
               ) : totalCount > 0 ? (
                 <>
-                  <ShoppingBag size={14} />
+                  <ShoppingBag size={12} />
                   {totalCount} ADDED
                 </>
               ) : (
                 <>
-                  <Plus size={14} />
+                  <Plus size={12} />
                   ADD
                 </>
               )}

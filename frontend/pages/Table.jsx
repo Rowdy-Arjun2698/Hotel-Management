@@ -7,6 +7,7 @@ import TableForm from "../components/TableForm";
 import DeleteTable from "../components/DeleteTable";
 import TableNav from "../components/TableNav"
 import TableEdit from "../components/TableEdit";
+import { Toaster } from "../components/Toaster";
 const Table = () => {
   const [open, setOpen] = useState(false);
   const [allTables, setAllTables] = useState([]);
@@ -15,6 +16,9 @@ const Table = () => {
   const [search, setSearch] = useState("");
   const [tb,settb]=useState(null);
   const [tbopen,settbopen]=useState(false);
+  const [toast, setToast] = useState({ show: false, success: true, message: "" });
+  
+    const fire = (success, message) => setToast({ show: true, success, message });
 
   async function fetchAllTables() {
     try {
@@ -47,8 +51,10 @@ async function handleDelete() {
     )
     await fetchAllTables();   // refresh after delete
     setdel(false);
+    fire(true, "Table deleted successfully!");
   } catch (error) {
     console.log(error);
+    fire(false, "Table is not deleted");
   }
   
 }
@@ -119,6 +125,15 @@ settbopen(false)
         }}
       />
     )}
+
+     <Toaster
+      show={toast.show}
+      success={toast.success}
+      message={toast.message}
+      onClose={() =>
+        setToast((prev) => ({ ...prev, show: false }))
+      }
+    />
   </div>
 )
 }

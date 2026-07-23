@@ -22,7 +22,7 @@ async function allfetch(req, res) {
 
 
         // Find table
-        const table = await Table.findById(id);
+        const table = await Table.findOne({_id:id});
 
 
         if (!table) {

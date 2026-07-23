@@ -8,14 +8,14 @@ import Loader from "../components/Loader"
 
 const BottomNav = () => {
 
-  const tableId=useParams();
+  const {tableId}=useParams();
 
 if(!tableId){
     return <Loader message="Loading restaurant..." />;
 }
 const navItems = [
   { to: `/customer/${tableId}/cmenu`, label: "Menu", icon: UtensilsCrossed, end: true },
-  { to: "/orders", label: "Orders", icon: Receipt },
+  { to: `/customer/${tableId}/COrders`, label: "Orders", icon: Receipt },
   { to: "/call-waiter", label: "Call Waiter", icon: ConciergeBell },
   { to: "/more", label: "More", icon: MoreHorizontal },
 ];

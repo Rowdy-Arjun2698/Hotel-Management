@@ -91,7 +91,7 @@ const Dropdown = ({ value, onChange, options, placeholder = "Select" }) => {
         ref={btnRef}
         type="button"
         onClick={toggleOpen}
-        className={`flex h-10 items-center gap-2 whitespace-nowrap rounded-full border px-4 pr-3 text-sm font-medium
+        className={`flex h-9 items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 pr-2.5 text-xs font-medium
                     outline-none transition-all duration-200 ease-out
                     ${
                       open
@@ -101,9 +101,9 @@ const Dropdown = ({ value, onChange, options, placeholder = "Select" }) => {
                         : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
                     }`}
       >
-        <span className="truncate max-w-[7.5rem]">{selectedLabel || placeholder}</span>
+        <span className="truncate max-w-[6rem]">{selectedLabel || placeholder}</span>
         <ChevronDown
-          size={15}
+          size={14}
           className={`text-current opacity-60 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
         />
       </button>
@@ -164,13 +164,13 @@ const CusMenuNav = ({ categories = [],setselcat,setsearcher,setfood}) => {
 
 
   return (
-    <div className="sticky top-0 z-30 bg-white px-4 pb-2 pt-3">
+    <div className="sticky top-0 z-30 bg-white px-4 pb-1.5 pt-2.5">
       {/* Search row */}
       <div className="flex items-center gap-2">
         <div className="group relative flex-1">
           <Search
-            size={18}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-colors duration-200 group-focus-within:text-red-700"
+            size={17}
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors duration-200 group-focus-within:text-red-700"
           />
           <input
             type="text"
@@ -180,7 +180,7 @@ const CusMenuNav = ({ categories = [],setselcat,setsearcher,setfood}) => {
     setsearcher(e.target.value);
   }}
             placeholder="Search for dishes..."
-            className="h-11 w-full rounded-full bg-orange-50/70 pl-11 pr-4 text-sm text-slate-700
+            className="h-10 w-full rounded-full bg-orange-50/70 pl-10 pr-4 text-sm text-slate-700
                        outline-none placeholder:text-slate-400
                        transition-all duration-200 ease-out
                        focus:bg-white focus:ring-2 focus:ring-red-200"
@@ -189,17 +189,17 @@ const CusMenuNav = ({ categories = [],setselcat,setsearcher,setfood}) => {
 
         <button
           type="button"
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-200
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200
                      text-slate-600 transition-all duration-200 ease-out
                      hover:bg-slate-50 active:scale-90"
           aria-label="Filters"
         >
-          <SlidersHorizontal size={17} strokeWidth={2} />
+          <SlidersHorizontal size={16} strokeWidth={2} />
         </button>
       </div>
 
-      {/* Dropdown row: Main category + Category, both compact pills */}
-      <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {/* Single filter row: main category + category dropdowns, then veg/egg/non-veg pills */}
+      <div className="mt-2 flex items-center gap-1.5 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <Dropdown
           onChange={(value)=>{setMainCategory(value)}}
           value={mainCategory}
@@ -227,10 +227,10 @@ const CusMenuNav = ({ categories = [],setselcat,setsearcher,setfood}) => {
             })),
           ]}
         />
-      </div>
 
-      {/* Veg / Egg / Non-veg filter row */}
-      <div className="mt-2.5 flex items-center gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {/* divider between dropdowns and quick filters */}
+        <span className="h-5 w-px shrink-0 bg-slate-200" />
+
         {foodTypes.map((type) => {
           const isActive = foodType === type.value;
           return (
@@ -250,7 +250,7 @@ const CusMenuNav = ({ categories = [],setselcat,setsearcher,setfood}) => {
     setfood("Non-Veg");
   }
 }}
-              className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium
+              className={`flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3 text-xs font-medium
                           transition-all duration-200 ease-out active:scale-95
                           ${
                             isActive

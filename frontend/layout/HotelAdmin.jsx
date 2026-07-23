@@ -2,6 +2,7 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 
+
 const HotelAdmin = () => {
   return (
     <div className="h-screen w-screen bg-gray-100 flex overflow-hidden">

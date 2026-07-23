@@ -10,6 +10,7 @@ import CustomerLayout from "../layout/CustomerLayouts";
 import Welcome from "../components/Welcome";
    import { CustomerProvider } from "../context/CustomerContext";
 import CustMenu from "../pages/CustMenu";
+import CustOrder from "../pages/CustOrder";
 
 const router=createBrowserRouter([
     {
@@ -64,10 +65,10 @@ const router=createBrowserRouter([
     //   path: "cart",
     //   element: <Cart />
     // },
-    // {
-    //   path: "orders",
-    //   element: <Orders />
-    // }
+     {
+      path: "COrders",
+     element: <CustOrder />
+     }
   
   ]
 }
