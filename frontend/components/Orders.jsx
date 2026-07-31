@@ -20,37 +20,27 @@ const STATUS_LABELS = {
 
 const currency = (n) => `₹${Number(n || 0).toFixed(2)}`;
 
-const formatTime = (timestamp) => {
-  if (!timestamp) return "";
-  const d = new Date(timestamp);
-  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-};
-
 const Orders = () => {
   const url = import.meta.env.VITE_BACKEND_URL;
   const navigate = useNavigate();
 
-  const { hotel, table, session } = useContext(CustomerContext);
+  const { hotel, table, session, items, setitems } = useContext(CustomerContext);
 
   const [loading, setLoading] = useState(true);
   const [placing, setPlacing] = useState(false);
   const [generatingBill, setGeneratingBill] = useState(false);
   const [error, setError] = useState("");
 
-  // Each round is a batch of items that has already been confirmed
-  // with the kitchen: { _id, placedAt, status, items: [...] }
-  const [rounds, setRounds] = useState([]);
-  // Items the customer has added from the menu since the last confirmation,
-  // sitting locally until they tap "Confirm & place order".
-  const [pendingItems, setPendingItems] = useState([]);
+  // The single order document for this session, containing all items
+  // confirmed with the kitchen so far: { _id, items: [...], totalAmount }
+  const [order, setOrder] = useState(null);
 
   const fetchOrder = async () => {
     try {
       const res = await axios.get(`${url}/api/customer/order/${session?._id}`, {
         withCredentials: true,
       });
-      setRounds(res.data.rounds || []);
-      setPendingItems(res.data.pendingItems || []);
+      setOrder(res.data.order || null);
     } catch (err) {
       console.log(err);
       setError("Couldn't load your order right now.");
@@ -69,37 +59,29 @@ const Orders = () => {
   }, [session]);
 
   const pendingTotal = useMemo(
-    () => pendingItems.reduce((sum, item) => sum + item.price * item.qty, 0),
-    [pendingItems]
+    () => items.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    [items]
   );
 
-  const roundTotal = (round) =>
-    round.items.reduce((sum, item) => sum + item.price * item.qty, 0);
-
-  const placedSoFarTotal = useMemo(
-    () => rounds.reduce((sum, round) => sum + roundTotal(round), 0),
-    [rounds]
-  );
-
-  const removePendingItem = (itemId) => {
-    setPendingItems((prev) => prev.filter((i) => i._id !== itemId));
+  const removePendingItem = (menuId) => {
+    setitems((prev) => prev.filter((i) => i.menuId !== menuId));
   };
 
   const handleConfirmOrder = async () => {
-    if (!pendingItems.length || placing) return;
+    if (!items.length || placing) return;
     setPlacing(true);
     try {
-      const res = await axios.post(
+      await axios.post(
         `${url}/api/customer/order/confirm`,
         {
           sessionId: session?._id,
           tableId: table?._id,
-          items: pendingItems,
+          items,
         },
         { withCredentials: true }
       );
-      setRounds((prev) => [...prev, res.data.round]);
-      setPendingItems([]);
+      setitems([]);
+      fetchOrder();
     } catch (err) {
       console.log(err);
       setError("Couldn't place your order. Please try again.");
@@ -130,9 +112,9 @@ const Orders = () => {
     return <Loader message="Fetching your order" />;
   }
 
-  const hasRounds = rounds.length > 0;
-  const hasPending = pendingItems.length > 0;
-  const canGenerateBill = hasRounds && !hasPending;
+  const hasOrder = order && order.items.length > 0;
+  const hasPending = items.length > 0;
+  const canGenerateBill = hasOrder && !hasPending;
 
   return (
     <div className="min-h-full bg-slate-50 pb-6">
@@ -152,48 +134,42 @@ const Orders = () => {
       )}
 
       <div className="px-5">
-        {/* Previous orders, grouped by round, each with its own status */}
+        {/* Placed orders */}
         <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">
-          {hasRounds ? "Previous orders" : "No items ordered yet"}
+          {hasOrder ? "Placed orders" : "No items ordered yet"}
         </h2>
 
-        {hasRounds ? (
+        {hasOrder ? (
           <div className="space-y-2.5 mb-3">
-            {rounds.map((round, idx) => (
-              <div
-                key={round._id}
-                className="rounded-2xl bg-white border border-slate-100 shadow-sm overflow-hidden"
-              >
-                <div className="flex items-center justify-between px-4 py-2.5 bg-slate-50">
-                  <p className="text-sm font-medium text-slate-700">
-                    Round {idx + 1} · {formatTime(round.placedAt)}
-                  </p>
-                  <span
-                    className={`text-xs font-medium px-2.5 py-1 rounded-full ${
-                      STATUS_STYLES[round.status] || "bg-slate-100 text-slate-500"
-                    }`}
+            <div className="rounded-2xl bg-white border border-slate-100 shadow-sm overflow-hidden">
+              <div className="divide-y divide-slate-100">
+                {order.items.map((item) => (
+                  <div
+                    key={item._id}
+                    className="flex items-center justify-between px-4 py-2.5"
                   >
-                    {STATUS_LABELS[round.status] || round.status}
-                  </span>
-                </div>
-                <div className="divide-y divide-slate-100">
-                  {round.items.map((item) => (
-                    <div
-                      key={item._id}
-                      className="flex items-center justify-between px-4 py-2.5"
-                    >
+                    <div>
                       <p className="text-sm text-slate-700">
-                        {item.name}{" "}
-                        <span className="text-slate-400">· Qty {item.qty}</span>
+                        {item.variantName}{" "}
+                        <span className="text-slate-400">
+                          · Qty {item.quantity}
+                        </span>
                       </p>
-                      <p className="text-sm font-medium text-slate-700">
-                        {currency(item.price * item.qty)}
-                      </p>
+                      <span
+                        className={`text-xs font-medium px-2.5 py-1 rounded-full inline-block mt-1 ${
+                          STATUS_STYLES[item.status] || "bg-slate-100 text-slate-500"
+                        }`}
+                      >
+                        {STATUS_LABELS[item.status] || item.status}
+                      </span>
                     </div>
-                  ))}
-                </div>
+                    <p className="text-sm font-medium text-slate-700">
+                      {currency(item.price * item.quantity)}
+                    </p>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         ) : (
           <div className="rounded-2xl bg-white border border-slate-100 shadow-sm px-4 py-6 text-center mb-3">
@@ -209,11 +185,11 @@ const Orders = () => {
           </div>
         )}
 
-        {hasRounds && (
+        {hasOrder && (
           <div className="flex items-center justify-between px-1 mb-5">
             <p className="text-sm text-slate-400">Placed so far</p>
             <p className="text-sm font-semibold text-slate-700">
-              {currency(placedSoFarTotal)}
+              {currency(order.totalAmount)}
             </p>
           </div>
         )}
@@ -225,25 +201,25 @@ const Orders = () => {
               Ordering now
             </h2>
             <div className="rounded-2xl bg-amber-50 border border-amber-100 divide-y divide-amber-100 mb-24">
-              {pendingItems.map((item) => (
+              {items.map((item) => (
                 <div
-                  key={item._id}
+                  key={item.menuId}
                   className="flex items-center justify-between px-4 py-3"
                 >
                   <div>
                     <p className="text-sm font-medium text-slate-800">
-                      {item.name}
+                      {item.dishName}
                     </p>
                     <p className="text-xs text-slate-500">
-                      Qty {item.qty} · {currency(item.price)}
+                      Qty {item.quantity} · {currency(item.price)}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
                     <p className="text-sm font-semibold text-slate-700">
-                      {currency(item.price * item.qty)}
+                      {currency(item.price * item.quantity)}
                     </p>
                     <button
-                      onClick={() => removePendingItem(item._id)}
+                      onClick={() => removePendingItem(item.menuId)}
                       className="text-xs text-red-400"
                     >
                       Remove

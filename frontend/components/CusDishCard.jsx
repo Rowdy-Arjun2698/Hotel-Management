@@ -89,7 +89,7 @@ const CusDishCard = ({ dish, onAdd, imageBaseUrl = "" }) => {
   const isAvailable = dish.isAvailable !== false;
   const foodTypeKey = normalizeFoodType(dish.foodType);
   const {url}=useContext(CustomerContext);
-  const { items, setItems } = useContext(CustomerContext);
+  const { items, setitems } = useContext(CustomerContext);
   const variants =
     dish.variants && dish.variants.length > 0
       ? dish.variants
@@ -138,7 +138,7 @@ const CusDishCard = ({ dish, onAdd, imageBaseUrl = "" }) => {
   };
 
  const handleConfirm = () => {
-  setItems((prev) => {
+  setitems((prev) => {
     const updated = [...prev];
 
     variants.forEach((variant) => {
