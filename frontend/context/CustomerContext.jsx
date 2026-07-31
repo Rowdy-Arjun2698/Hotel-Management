@@ -10,6 +10,8 @@ export const CustomerProvider = ({children}) => {
     const [table,setTable] = useState(null);
     const [session,setSession] = useState(null);
     const [url,seturl]=useState(import.meta.env.VITE_BACKEND_URL);
+    const [items,setitems]=useState([])
+    const [bill,setBill]=useState(null);
 
     const clearSession = () => {
         setHotel(null);
@@ -27,7 +29,9 @@ export const CustomerProvider = ({children}) => {
                 setTable,
                 setSession,
                 clearSession,
-                url
+                url,
+                items,
+                setitems
             }}
         >
             {children}

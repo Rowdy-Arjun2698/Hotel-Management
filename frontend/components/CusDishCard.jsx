@@ -89,7 +89,7 @@ const CusDishCard = ({ dish, onAdd, imageBaseUrl = "" }) => {
   const isAvailable = dish.isAvailable !== false;
   const foodTypeKey = normalizeFoodType(dish.foodType);
   const {url}=useContext(CustomerContext);
-
+  const { items, setItems } = useContext(CustomerContext);
   const variants =
     dish.variants && dish.variants.length > 0
       ? dish.variants
@@ -137,15 +137,39 @@ const CusDishCard = ({ dish, onAdd, imageBaseUrl = "" }) => {
     });
   };
 
-  const handleConfirm = () => {
-    const selections = variants
-      .filter((v) => qty[v.name] > 0)
-      .map((v) => ({ ...v, quantity: qty[v.name] }));
-    if (selections.length > 0 && onAdd) {
-      onAdd(dish, selections);
-    }
-    setOpen(false);
-  };
+ const handleConfirm = () => {
+  setItems((prev) => {
+    const updated = [...prev];
+
+    variants.forEach((variant) => {
+      const quantity = qty[variant.name] || 0;
+      if (quantity === 0) return;
+
+      const index = updated.findIndex(
+        (item) =>
+          item.menuId === dish._id &&
+          item.variantName === variant.name
+      );
+
+      if (index !== -1) {
+        updated[index].quantity += quantity;
+      } else {
+        updated.push({
+          menuId: dish._id,
+          dishName: dish.dishName,
+          image: dish.image,
+          variantName: variant.name,
+          quantity,
+        });
+      }
+    });
+
+    return updated;
+  });
+
+  setQty({});
+  setOpen(false);
+};
 
   return (
     <div

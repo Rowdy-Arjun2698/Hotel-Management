@@ -118,7 +118,7 @@ async function addCat(req,res) {
     }
     console.log(req.body);
     const {mainCategory,Catname}=req.body;
-    if(! {mainCategory,Catname}){
+    if(!mainCategory || !Catname){
         return res.status(400).json({
             message:"No api call"
         })
@@ -164,7 +164,7 @@ async function fethAllmenu(req,res) {
        const dishes = await Menu
     .find({ hotelId: req.hotel._id })
     .populate("categoryId");
-    res.status(201).json({
+    res.status(200).json({
         message:"All dishes fetched",
         success:true,
         dishes
