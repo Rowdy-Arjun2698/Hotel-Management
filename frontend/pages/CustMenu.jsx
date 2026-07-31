@@ -3,6 +3,7 @@ import axios from "axios";
 import CusMenuNav from "../components/CusMenuNav";
 import { CustomerContext } from "../context/CustomerContext";
 import CusDishCard from "../components/CusDishCard";
+import { socket } from "../src/socket";
 
 
 const CustMenu = () => {
@@ -53,6 +54,50 @@ const CustMenu = () => {
     fetchMenu();
    
   }, []);
+  useEffect(() => {
+
+ socket.on("dishAvailabilityChanged", (data) => {
+
+    console.log("Socket Event:", data);
+
+    setDishes(prev => {
+
+        console.log("Before:", prev);
+
+        const updated = prev.map(dish => {
+
+            console.log(
+                dish._id.toString(),
+                data.dishId.toString()
+            );
+
+            if (dish._id.toString() === data.dishId.toString()) {
+
+                console.log("MATCH");
+
+                return {
+                    ...dish,
+                    isAvailable: data.isAvailable,
+                };
+            }
+
+            return dish;
+
+        });
+
+        console.log("After:", updated);
+
+        return updated;
+
+    });
+
+});
+
+  return () => {
+    socket.off("dishAvailabilityChanged");
+  };
+
+}, []);
 useEffect(()=>{
   console.log(dishes);
   console.log("from gandu",filteredDishes)
