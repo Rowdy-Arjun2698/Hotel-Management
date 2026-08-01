@@ -2,6 +2,9 @@ const Table = require("../models/tables.model");
 const Qrcode = require("qrcode");
 const path = require("path");
 const fs = require("fs");
+const Session = require("../models/session.model");
+const Order = require("../models/orders.model");
+const Menu=require("../models/menu.model")
 
 
 
@@ -214,9 +217,64 @@ async function updatetb(req, res) {
         });
     }
 }
+
+//get all the orders 
+async function getorders(req,res){
+    try{
+    if (!req.hotel) {
+        return res.status(401).json({
+            success: false,
+            message: "Login First"
+        });
+    }
+  const id = req.params.id;
+ // Debugging line
+  if(!id){
+    return res.status(400).json({
+        success:false,
+        message:"Invalid Table data !!"
+
+    })
+  }
+  const session = await Session.findOne({
+     hotelId:req.hotel._id,
+    tableId: id,
+    });
+if (!session) {
+    return res.status(200).json({
+        success: true,
+        order: null
+    });
+}
+
+const order = await Order.findOne({
+    sessionId: session._id
+}).populate({
+  path: "items.menuId",
+  select: "dishName image",
+});
+
+return res.status(200).json({
+      success: true,
+      order,
+    });
+  } catch (error) {
+    console.error("Error fetching table order:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+
+
+
+}
 module.exports={
     addtables,
     gettables,
     deleteTable,
-    updatetb
+    updatetb,
+    getorders
 }

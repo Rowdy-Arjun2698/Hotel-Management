@@ -14,6 +14,7 @@ import { IoReceiptSharp, IoOptions } from "react-icons/io5";
 import { FaLocationDot } from "react-icons/fa6";
 import QrModel from "./QrModel";
 
+
 const typeStyles = {
   AC: {
     icon: <MdAcUnit className="text-sm" />,
@@ -29,7 +30,7 @@ const typeStyles = {
   },
 };
 
-const TableCard = ({ tableData,openDelete,setTable,settb,openEdit }) => {
+const TableCard = ({ tableData,openDelete,setTable,settb,openEdit,Openorder,settorder }) => {
   console.log(tableData.qr);
   const [openQR, setOpenQR] = useState(false);
 
@@ -45,6 +46,10 @@ const handledel=()=>{
 const handleEdit=()=>{
   settb(tableData)
  openEdit();
+}
+const handleOrder=()=>{
+  settorder(tableData)
+  Openorder();
 }
   return (
     <div className="w-[250px] h-[250px] rounded-2xl bg-sky-50 border-1 border-gray-300 shadow-lg hover:shadow-2xl transition-all duration-300 p-5 flex flex-col m-4 justify-between">
@@ -84,7 +89,7 @@ const handleEdit=()=>{
       {/* Buttons */}
       <div className="grid grid-cols-2 gap-2">
 
-        <button className="flex items-center justify-center gap-2 bg-blue-50 text-blue-600 rounded-lg py-2 hover:bg-blue-100 cursor-pointer transition">
+        <button className="flex items-center justify-center gap-2 bg-blue-50 text-blue-600 rounded-lg py-2 hover:bg-blue-100 cursor-pointer transition" onClick={handleOrder}>
           <IoReceiptSharp />
           Order
         </button>

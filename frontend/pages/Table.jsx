@@ -8,6 +8,7 @@ import DeleteTable from "../components/DeleteTable";
 import TableNav from "../components/TableNav"
 import TableEdit from "../components/TableEdit";
 import { Toaster } from "../components/Toaster";
+import TableOrdersModal from "../components/TableOrdersModal";
 const Table = () => {
   const [open, setOpen] = useState(false);
   const [allTables, setAllTables] = useState([]);
@@ -17,6 +18,8 @@ const Table = () => {
   const [tb,settb]=useState(null);
   const [tbopen,settbopen]=useState(false);
   const [toast, setToast] = useState({ show: false, success: true, message: "" });
+  const[orderopen,setorderopen]=useState(false);
+  const [torder,settorder]=useState(null);
   
     const fire = (success, message) => setToast({ show: true, success, message });
 
@@ -89,6 +92,8 @@ const filteredTables = allTables.filter((table) =>
             setTable={setTable}
             openEdit={()=>{settbopen(true)}}
             settb={settb}
+            settorder={settorder}
+            Openorder={()=>{setorderopen(true)}}
           />
         ))}
         <AddTable onClick={() => setOpen(true)} />
@@ -103,6 +108,14 @@ const filteredTables = allTables.filter((table) =>
         onConfirm={handleDelete}
       />
     )}
+
+{orderopen && (
+  <TableOrdersModal
+    tableId={torder._id}
+    tableNumber={torder.tableNumber}
+    onClose={() => setorderopen(false)}
+  />
+)}
 
   {tbopen &&(
     <TableEdit
