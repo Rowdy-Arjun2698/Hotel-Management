@@ -17,6 +17,9 @@ const orderItemSchema = new mongoose.Schema(
       type: Number,
    
     },
+    finalprice: {
+      type: Number,
+    },
 
     quantity: {
       type: Number,
@@ -26,7 +29,7 @@ const orderItemSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["Preparing", "Ready", "Served", "Cancelled"],
+      enum: ["Preparing", "Ready", "Served", "Cancelled", "Placed"],
       default: "Preparing",
     },
   },

@@ -155,10 +155,13 @@ const CusDishCard = ({ dish, onAdd, imageBaseUrl = "" }) => {
         updated[index].quantity += quantity;
       } else {
         updated.push({
+          cartId: crypto.randomUUID(),
           menuId: dish._id,
           dishName: dish.dishName,
           image: dish.image,
           variantName: variant.name,
+          price: variant.price,
+          finalPrice: variant.price * quantity,
           quantity,
         });
       }
