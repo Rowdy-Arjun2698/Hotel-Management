@@ -11,6 +11,8 @@ import Welcome from "../components/Welcome";
    import { CustomerProvider } from "../context/CustomerContext";
 import CustMenu from "../pages/CustMenu";
 import CustOrder from "../pages/CustOrder";
+import OrdersHotel from "../pages/OrdersHotel";
+import Profile from "../pages/Profile";
 
 const router=createBrowserRouter([
     {
@@ -41,6 +43,14 @@ const router=createBrowserRouter([
       {
         path: "Menu",
         element: <Menu/>
+      },
+      {
+        path: "Orders",
+        element: <OrdersHotel />
+      },
+      {
+        path: "Profile",
+        element: <Profile />
       }
     ]
   },
