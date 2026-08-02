@@ -10,123 +10,179 @@ import { RiServiceBellFill } from "react-icons/ri";
 import { TbReportAnalytics } from "react-icons/tb";
 import { FiLogOut } from "react-icons/fi";
 import { CgProfile } from "react-icons/cg";
-import { NavLink,useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import axios from "axios";
 
+const navLinkClass = ({ isActive }) =>
+  `group relative w-full h-[10%] flex justify-center items-center gap-3 rounded-lg cursor-pointer font-medium text-[15px] transition-all duration-300 ease-out overflow-hidden
+  ${
+    isActive
+      ? "bg-[#d2873a] text-white shadow-md shadow-[#d2873a]/30"
+      : "text-white/70 hover:text-white hover:bg-[#d2873a]/20 hover:pl-1"
+  }`;
+
 const Sidebar = () => {
-    const navigate = useNavigate();
-    const logout = () => {
-       const response=axios.get("http://localhost:3000/api/hotel/logout",{withCredentials:true})    
-       navigate("/")                
-    };
+  const navigate = useNavigate();
+  const logout = () => {
+    const response = axios.get("http://localhost:3000/api/hotel/logout", {
+      withCredentials: true,
+    });
+    navigate("/");
+  };
+
   return (
-    <div className="side w-full h-full bg-transparent flex flex-col ">
-      <div className="logo w-full h-[10%] bg-transparent flex justify-center items-center  ">
-        <span className=" bg-red-500 p-3 m-3 ">Only for the logo</span>
+    <div className="side w-full h-full bg-transparent flex flex-col">
+      <div className="logo w-full h-[10%] bg-transparent flex justify-center items-center">
+        <span className="bg-red-500 p-3 m-3">Only for the logo</span>
       </div>
+
       <div className="featurelist w-full h-[90%] bg-transparent flex flex-col justify-start items-center text-white p-4 gap-4">
-        <NavLink
-          to="/hoteladmin/Home"
-          className={({ isActive }) =>
-            `w-full h-[10%] flex justify-center items-center gap-3 rounded-lg cursor-pointer ${
-              isActive ? "bg-[#d2873aff]" : "hover:bg-[#d2873aff]"
-            }`
-          }
+        <NavLink to="/hoteladmin/Home" className={navLinkClass}>
+          {({ isActive }) => (
+            <>
+              <span
+                className={`absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r-full bg-white transition-all duration-300 ${
+                  isActive ? "opacity-100 scale-100" : "opacity-0 scale-0"
+                }`}
+              />
+              <IoHome className="transition-transform duration-300 group-hover:scale-110" />
+              Home
+            </>
+          )}
+        </NavLink>
+
+        <NavLink to="/hoteladmin/Dashboard" className={navLinkClass}>
+          {({ isActive }) => (
+            <>
+              <span
+                className={`absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r-full bg-white transition-all duration-300 ${
+                  isActive ? "opacity-100 scale-100" : "opacity-0 scale-0"
+                }`}
+              />
+              <MdSpaceDashboard className="transition-transform duration-300 group-hover:scale-110" />
+              Dashboard
+            </>
+          )}
+        </NavLink>
+
+        <NavLink to="/hoteladmin/Menu" className={navLinkClass}>
+          {({ isActive }) => (
+            <>
+              <span
+                className={`absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r-full bg-white transition-all duration-300 ${
+                  isActive ? "opacity-100 scale-100" : "opacity-0 scale-0"
+                }`}
+              />
+              <IoRestaurant className="transition-transform duration-300 group-hover:scale-110" />
+              Menu
+            </>
+          )}
+        </NavLink>
+
+        <NavLink to="/hoteladmin/Table" className={navLinkClass}>
+          {({ isActive }) => (
+            <>
+              <span
+                className={`absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r-full bg-white transition-all duration-300 ${
+                  isActive ? "opacity-100 scale-100" : "opacity-0 scale-0"
+                }`}
+              />
+              <MdTableRestaurant className="transition-transform duration-300 group-hover:scale-110" />
+              Table Management
+            </>
+          )}
+        </NavLink>
+
+        <NavLink to="/hoteladmin/Orders" className={navLinkClass}>
+          {({ isActive }) => (
+            <>
+              <span
+                className={`absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r-full bg-white transition-all duration-300 ${
+                  isActive ? "opacity-100 scale-100" : "opacity-0 scale-0"
+                }`}
+              />
+              <MdKitchen className="transition-transform duration-300 group-hover:scale-110" />
+              Orders
+            </>
+          )}
+        </NavLink>
+
+        <NavLink to="/hoteladmin/WaiterDashboard" className={navLinkClass}>
+          {({ isActive }) => (
+            <>
+              <span
+                className={`absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r-full bg-white transition-all duration-300 ${
+                  isActive ? "opacity-100 scale-100" : "opacity-0 scale-0"
+                }`}
+              />
+              <RiServiceBellFill className="transition-transform duration-300 group-hover:scale-110" />
+              Waiter dashboard
+            </>
+          )}
+        </NavLink>
+
+        <NavLink to="/hoteladmin/Account" className={navLinkClass}>
+          {({ isActive }) => (
+            <>
+              <span
+                className={`absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r-full bg-white transition-all duration-300 ${
+                  isActive ? "opacity-100 scale-100" : "opacity-0 scale-0"
+                }`}
+              />
+              <MdOutlineAccountBalanceWallet className="transition-transform duration-300 group-hover:scale-110" />
+              Account
+            </>
+          )}
+        </NavLink>
+
+        <NavLink to="/hoteladmin/Reports" className={navLinkClass}>
+          {({ isActive }) => (
+            <>
+              <span
+                className={`absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r-full bg-white transition-all duration-300 ${
+                  isActive ? "opacity-100 scale-100" : "opacity-0 scale-0"
+                }`}
+              />
+              <TbReportAnalytics className="transition-transform duration-300 group-hover:scale-110" />
+              Reports
+            </>
+          )}
+        </NavLink>
+
+        <NavLink to="/hoteladmin/Profile" className={navLinkClass}>
+          {({ isActive }) => (
+            <>
+              <span
+                className={`absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r-full bg-white transition-all duration-300 ${
+                  isActive ? "opacity-100 scale-100" : "opacity-0 scale-0"
+                }`}
+              />
+              <CgProfile className="transition-transform duration-300 group-hover:scale-110" />
+              Profile
+            </>
+          )}
+        </NavLink>
+
+        <NavLink to="/hoteladmin/Settings" className={navLinkClass}>
+          {({ isActive }) => (
+            <>
+              <span
+                className={`absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r-full bg-white transition-all duration-300 ${
+                  isActive ? "opacity-100 scale-100" : "opacity-0 scale-0"
+                }`}
+              />
+              <IoSettings className="transition-transform duration-300 group-hover:scale-110" />
+              Settings
+            </>
+          )}
+        </NavLink>
+
+        <button
+          className="group w-full text-red-400 h-[10%] bg-transparent flex justify-center items-center rounded-lg cursor-pointer gap-3 font-medium text-[15px] transition-all duration-300 ease-out hover:bg-red-500 hover:text-white hover:shadow-md hover:shadow-red-500/30"
+          onClick={logout}
         >
-          <IoHome /> Home
-        </NavLink>
-        <NavLink
-  to="/hoteladmin/Dashboard"
-  className={({ isActive }) =>
-    `w-full h-[10%] flex justify-center items-center gap-3 rounded-lg cursor-pointer ${
-      isActive ? "bg-[#d2873aff]" : "hover:bg-[#d2873aff]"
-    }`
-  }
->
-          <MdSpaceDashboard /> Dashboard
-        </NavLink>
-       <NavLink
-  to="/hoteladmin/Menu"
-  className={({ isActive }) =>
-    `w-full h-[10%] flex justify-center items-center gap-3 rounded-lg cursor-pointer ${
-      isActive ? "bg-[#d2873aff]" : "hover:bg-[#d2873aff]"
-    }`
-  }
->
-          <IoRestaurant /> Menu
-        </NavLink>
-       <NavLink
-  to="/hoteladmin/Table"
-  className={({ isActive }) =>
-    `w-full h-[10%] flex justify-center items-center gap-3 rounded-lg cursor-pointer ${
-      isActive ? "bg-[#d2873aff]" : "hover:bg-[#d2873aff]"
-    }`
-  }
->
-          <MdTableRestaurant /> Table Management
-        </NavLink>
-       <NavLink
-  to="/hoteladmin/Orders"
-  className={({ isActive }) =>
-    `w-full h-[10%] flex justify-center items-center gap-3 rounded-lg cursor-pointer ${
-      isActive ? "bg-[#d2873aff]" : "hover:bg-[#d2873aff]"
-    }`
-  }
->
-          <MdKitchen /> Orders
-        </NavLink>
-      <NavLink
-  to="/hoteladmin/WaiterDashboard"
-  className={({ isActive }) =>
-    `w-full h-[10%] flex justify-center items-center gap-3 rounded-lg cursor-pointer ${
-      isActive ? "bg-[#d2873aff]" : "hover:bg-[#d2873aff]"
-    }`
-  }
->
-          <RiServiceBellFill /> Waiter dashboard
-        </NavLink>
-        <NavLink
-  to="/hoteladmin/Account"
-  className={({ isActive }) =>
-    `w-full h-[10%] flex justify-center items-center gap-3 rounded-lg cursor-pointer ${
-      isActive ? "bg-[#d2873aff]" : "hover:bg-[#d2873aff]"
-    }`
-  }
->
-          <MdOutlineAccountBalanceWallet /> Account
-        </NavLink>
-        <NavLink
-  to="/hoteladmin/Reports"
-  className={({ isActive }) =>
-    `w-full h-[10%] flex justify-center items-center gap-3 rounded-lg cursor-pointer ${
-      isActive ? "bg-[#d2873aff]" : "hover:bg-[#d2873aff]"
-    }`
-  }
->
-          <TbReportAnalytics /> Reports
-        </NavLink>
-        <NavLink
-  to="/hoteladmin/Profile"
-  className={({ isActive }) =>
-    `w-full h-[10%] flex justify-center items-center gap-3 rounded-lg cursor-pointer ${
-      isActive ? "bg-[#d2873aff]" : "hover:bg-[#d2873aff]"
-    }`
-  }
->
-          <CgProfile /> Profile
-        </NavLink>
-       <NavLink
-  to="/hoteladmin/Settings"
-  className={({ isActive }) =>
-    `w-full h-[10%] flex justify-center items-center gap-3 rounded-lg cursor-pointer ${
-      isActive ? "bg-[#d2873aff]" : "hover:bg-[#d2873aff]"
-    }`
-  }
->
-          <IoSettings /> Settings
-        </NavLink>
-        <button className="w-full text-red-500 h-[10%] bg-transparent flex justify-center items-center rounded-lg cursor-pointer gap-3 hover:bg-red-500 hover:text-white   " onClick={logout}>
-          Logout <FiLogOut />
+          Logout
+          <FiLogOut className="transition-transform duration-300 group-hover:translate-x-1" />
         </button>
       </div>
     </div>

@@ -14,7 +14,10 @@ import {
   Calendar,
   History,
   ShieldCheck,
+  X,
+  Loader2,
 } from "lucide-react";
+
 
 function Field({ icon: Icon, label, value }) {
   return (
@@ -72,25 +75,190 @@ function Skeleton() {
   );
 }
 
+/* ---------- Edit form helpers ---------- */
+
+function InputField({ label, name, value, onChange, type = "text" }) {
+  return (
+    <label className="block">
+      <span className="text-sm text-gray-500">{label}</span>
+      <input
+        type={type}
+        name={name}
+        value={value ?? ""}
+        onChange={onChange}
+        className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-[15px] text-gray-900 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+      />
+    </label>
+  );
+}
+
+function EditProfileModal({ initialData, onClose, onSaved }) {
+  const [formData, setFormData] = useState({
+    hotelName: initialData?.hotelName || "",
+    owenerName: initialData?.owenerName || "",
+    email: initialData?.email || "",
+    phone: initialData?.phone || "",
+    address: initialData?.address || "",
+    city: initialData?.city || "",
+    pincode: initialData?.pincode || "",
+    logo: initialData?.logo || "",
+    gstenable: !!initialData?.gstenable,
+    gstnumber: initialData?.gstnumber || "",
+    gstper: initialData?.gstper ?? "",
+    fssaiNumber: initialData?.fssaiNumber || "",
+    openingtime: initialData?.openingtime || "",
+    closetime: initialData?.closetime || "",
+    tables: initialData?.tables ?? "",
+  });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  function handleChange(e) {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+
+    try {
+      const response = await axios.put(
+        `${import.meta.env.VITE_BACKEND_URL}/api/profile/update_profile`,
+        formData,
+        { withCredentials: true }
+      );
+
+      if (response.data.success) {
+        onSaved(response.data.data || formData);
+      } else {
+        setError(response.data.message || "Failed to update profile.");
+      }
+    } catch (err) {
+      console.log(err);
+      setError(
+        err?.response?.data?.message || "Something went wrong. Try again."
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 shadow-lg">
+        <div className="mb-5 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-gray-900">Edit Profile</h2>
+          <button
+            onClick={onClose}
+            className="rounded-full p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <InputField label="Hotel Name" name="hotelName" value={formData.hotelName} onChange={handleChange} />
+            <InputField label="Owner Name" name="owenerName" value={formData.owenerName} onChange={handleChange} />
+            <InputField label="Email" name="email" type="email" value={formData.email} onChange={handleChange} />
+            <InputField label="Phone" name="phone" value={formData.phone} onChange={handleChange} />
+            <InputField label="Address" name="address" value={formData.address} onChange={handleChange} />
+            <InputField label="City" name="city" value={formData.city} onChange={handleChange} />
+            <InputField label="Pincode" name="pincode" value={formData.pincode} onChange={handleChange} />
+            <InputField label="Logo URL" name="logo" value={formData.logo} onChange={handleChange} />
+          </div>
+
+          <div className="border-t border-gray-200 pt-5">
+            <p className="mb-3 text-sm font-semibold text-gray-700">Business Information</p>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="gstenable"
+                  checked={formData.gstenable}
+                  onChange={handleChange}
+                  className="h-4 w-4 rounded border-gray-300 text-orange-500 focus:ring-orange-300"
+                />
+                <span className="text-sm text-gray-700">GST Enabled</span>
+              </label>
+              <InputField label="GST Number" name="gstnumber" value={formData.gstnumber} onChange={handleChange} />
+              <InputField label="GST Percentage" name="gstper" type="number" value={formData.gstper} onChange={handleChange} />
+              <InputField label="FSSAI Number" name="fssaiNumber" value={formData.fssaiNumber} onChange={handleChange} />
+            </div>
+          </div>
+
+          <div className="border-t border-gray-200 pt-5">
+            <p className="mb-3 text-sm font-semibold text-gray-700">Timing & Capacity</p>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <InputField label="Opening Time" name="openingtime" value={formData.openingtime} onChange={handleChange} />
+              <InputField label="Closing Time" name="closetime" value={formData.closetime} onChange={handleChange} />
+              <InputField label="Total Tables" name="tables" type="number" value={formData.tables} onChange={handleChange} />
+            </div>
+          </div>
+
+          {error && (
+            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600">
+              {error}
+            </p>
+          )}
+
+          <div className="flex justify-end gap-3 border-t border-gray-200 pt-5">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={saving}
+              className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="flex items-center gap-2 rounded-lg bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600 disabled:opacity-60"
+            >
+              {saving && <Loader2 size={16} className="animate-spin" />}
+              {saving ? "Saving..." : "Save Changes"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Main component ---------- */
+
 const Profile = () => {
   const [hotel, setHotel] = useState(null);
   const [status, setStatus] = useState("loading"); // loading | error | success
+  const [showEditModal, setShowEditModal] = useState(false);
 
   async function fetchHotel() {
     setStatus("loading");
+
     try {
       const response = await axios.get(
-        "http://localhost:3000/api/hotel/fetchuser",
-        { withCredentials: true }
+        `${import.meta.env.VITE_BACKEND_URL}/api/profile/fetch_profile`,
+        {
+          withCredentials: true,
+        }
       );
-      if (response.data?.success) {
-        setHotel(response.data.user);
+
+      if (response.data.success) {
+        setHotel(response.data.data);
         setStatus("success");
       } else {
+        console.log("Backend returned success:false");
         setStatus("error");
       }
     } catch (err) {
-      console.error(err);
+      console.log(err);
+      console.log(err.response);
       setStatus("error");
     }
   }
@@ -98,6 +266,11 @@ const Profile = () => {
   useEffect(() => {
     fetchHotel();
   }, []);
+
+  function handleSaved(updatedData) {
+    setHotel((prev) => ({ ...prev, ...updatedData }));
+    setShowEditModal(false);
+  }
 
   if (status === "loading") return <Skeleton />;
 
@@ -121,12 +294,6 @@ const Profile = () => {
   }
 
   const rating = Math.round(hotel?.rating ?? 5);
-  const address = hotel?.address || {};
-  const addressLine =
-    hotel?.addressLine ||
-    address?.line ||
-    [address?.locality, address?.city].filter(Boolean).join(", ");
-
   return (
     <div className="min-h-full bg-gray-100 px-8 py-8">
       {/* Page header */}
@@ -137,7 +304,10 @@ const Profile = () => {
             View and manage your hotel information
           </p>
         </div>
-        <button className="flex items-center gap-2 rounded-lg bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600">
+        <button
+          onClick={() => setShowEditModal(true)}
+          className="flex items-center gap-2 rounded-lg bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600"
+        >
           <Pencil size={16} />
           Edit Profile
         </button>
@@ -148,9 +318,9 @@ const Profile = () => {
         <div className="h-fit rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
           <div className="flex flex-col items-center text-center">
             <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full bg-gray-900">
-              {hotel?.logoUrl ? (
+              {hotel?.logo ? (
                 <img
-                  src={hotel.logoUrl}
+                  src={hotel.logo}
                   alt={hotel?.hotelName || "Hotel logo"}
                   className="h-full w-full object-cover"
                 />
@@ -181,18 +351,16 @@ const Profile = () => {
           <div className="my-6 border-t border-gray-200" />
 
           <div className="space-y-5">
-            <Field icon={User} label="Owner Name" value={hotel?.ownerName} />
+            <Field icon={User} label="Owner Name" value={hotel?.owenerName} />
             <Field icon={Mail} label="Email" value={hotel?.email} />
             <Field icon={Phone} label="Phone" value={hotel?.phone} />
             <Field
               icon={MapPin}
               label="Address"
               value={
-                addressLine
-                  ? `${addressLine}${
-                      address?.state ? ", " + address.state : ""
-                    }${address?.pincode ? " - " + address.pincode : ""}`
-                  : hotel?.fullAddress
+                `${hotel?.address || ""}, ${hotel?.city || ""}${
+                  hotel?.pincode ? " - " + hotel.pincode : ""
+                }`
               }
             />
           </div>
@@ -207,20 +375,20 @@ const Profile = () => {
                 <span
                   className={
                     "mt-1.5 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold " +
-                    (hotel?.gstEnabled
+                    (hotel?.gstenable
                       ? "bg-green-100 text-green-700"
                       : "bg-gray-100 text-gray-500")
                   }
                 >
-                  {hotel?.gstEnabled ? "Yes" : "No"}
+                  {hotel?.gstenable ? "Yes" : "No"}
                 </span>
               </div>
-              <InfoItem label="GST Number" value={hotel?.gstNumber} />
+              <InfoItem label="GST Number" value={hotel?.gstnumber} />
               <InfoItem
                 label="GST Percentage"
                 value={
-                  hotel?.gstPercentage != null
-                    ? `${hotel.gstPercentage}%`
+                  hotel?.gstper != null
+                    ? `${hotel.gstper}%`
                     : null
                 }
               />
@@ -232,23 +400,23 @@ const Profile = () => {
 
           <SectionCard icon={Clock} title="Restaurant Timing">
             <div className="grid grid-cols-2 gap-6">
-              <InfoItem label="Opening Time" value={hotel?.openingTime} />
-              <InfoItem label="Closing Time" value={hotel?.closingTime} />
+              <InfoItem label="Opening Time" value={hotel?.openingtime} />
+              <InfoItem label="Closing Time" value={hotel?.closetime} />
             </div>
           </SectionCard>
 
           <SectionCard icon={UtensilsCrossed} title="Restaurant Capacity">
-            <InfoItem label="Total Tables" value={hotel?.totalTables} />
+            <InfoItem label="Total Tables" value={hotel?.tables} />
           </SectionCard>
 
           <SectionCard icon={Info} title="Other Information">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <InfoItem label="City" value={address?.city} />
-              <InfoItem label="Logo URL" value={hotel?.logoUrl} />
-              <InfoItem label="Pincode" value={address?.pincode} />
+              <InfoItem label="City" value={hotel?.city} />
+              <InfoItem label="Logo URL" value={hotel?.logo} />
+              <InfoItem label="Pincode" value={hotel?.pincode} />
               <InfoItem
                 label="Registered On"
-                value={formatDate(hotel?.registeredOn || hotel?.createdAt)}
+                value={formatDate(hotel?.createdAt)}
               />
             </div>
           </SectionCard>
@@ -287,6 +455,14 @@ const Profile = () => {
           </div>
         </div>
       </div>
+
+      {showEditModal && (
+        <EditProfileModal
+          initialData={hotel}
+          onClose={() => setShowEditModal(false)}
+          onSaved={handleSaved}
+        />
+      )}
     </div>
   );
 };
