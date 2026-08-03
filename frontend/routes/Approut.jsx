@@ -13,6 +13,7 @@ import CustMenu from "../pages/CustMenu";
 import CustOrder from "../pages/CustOrder";
 import OrdersHotel from "../pages/OrdersHotel";
 import Profile from "../pages/Profile";
+import Dashboard from "../pages/Dashboard"; 
 
 const router=createBrowserRouter([
     {
@@ -31,6 +32,10 @@ const router=createBrowserRouter([
       {
         path: "Home",
         element: <Home />
+      },
+       {
+        path: "Dashboard",
+        element: <Dashboard />
       },
       {
         path: "Settings",

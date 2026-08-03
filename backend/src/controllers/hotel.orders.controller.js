@@ -13,11 +13,15 @@ async function fetchActiveTables(req,res){
    }    
    try {
     const orders = await Order.find({
-        hotelId: hotel._id,
-        "items.status": { $in: ["Preparing"] }
+  hotelId: hotel._id,
+  "items.status": "Preparing",
 })
-.populate("tableId")
-.sort({ createdAt: 1 });
+  .populate("tableId")
+  .populate({
+    path: "items.menuId",
+    select: "dishName image foodType",
+  })
+  .sort({ createdAt: 1 });
 console.log(orders)
 
     res.status(200).json({

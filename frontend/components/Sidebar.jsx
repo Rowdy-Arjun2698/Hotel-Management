@@ -15,7 +15,7 @@ import axios from "axios";
 
 
 const navLinkClass = ({ isActive }) =>
-  `group relative w-full h-[10%] flex justify-center items-center gap-3 rounded-lg cursor-pointer font-medium text-[15px] transition-all duration-300 ease-out overflow-hidden
+  `group relative w-full h-12 flex justify-center items-center gap-3 rounded-lg cursor-pointer font-medium text-[15px] transition-all duration-300 ease-out overflow-hidden
   ${
     isActive
       ? "bg-[#d2873a] text-white shadow-md shadow-[#d2873a]/30"
@@ -184,7 +184,7 @@ const Sidebar = () => {
         </NavLink>
 
         <button
-          className="group w-full text-red-400 h-[10%] bg-transparent flex justify-center items-center rounded-lg cursor-pointer gap-3 font-medium text-[15px] transition-all duration-300 ease-out hover:bg-red-500 hover:text-white hover:shadow-md hover:shadow-red-500/30"
+          className="group w-full text-red-400 h-12 bg-transparent flex justify-center items-center rounded-lg cursor-pointer gap-3 font-medium text-[15px] transition-all duration-300 ease-out hover:bg-red-500 hover:text-white hover:shadow-md hover:shadow-red-500/30"
           onClick={logout}
         >
           Logout

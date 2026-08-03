@@ -21,12 +21,13 @@ const OrdersHotel = () => {
   async function fetchActiveTables() {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}api/hotelOrders/active_tables`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/hotelOrders/active_tables`,
         { withCredentials: true }
       );
       if (response.data.success) {
         // backend returns orders, each with a nested tableId object
         // and its own items[] (each item has its own status)
+        console.log("Fetched active tables:", response.data.orders);
         setOrders(response.data.orders || response.data.data);
       }
     } catch (err) {
@@ -47,6 +48,10 @@ const OrdersHotel = () => {
       : []; // any other filter has nothing to show, since panel = Preparing only
 
   const selectedOrder = orders.find((o) => o._id === selectedOrderId);
+
+  console.log("orders", orders);
+console.log("preparingOrders", preparingOrders);
+console.log("filteredOrders", filteredOrders);
 
   return (
     <div className="min-h-full w-full bg-gray-100 px-8 py-8">
@@ -110,10 +115,10 @@ const OrdersHotel = () => {
       {/* Main layout */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_1fr]">
         <TablesPanel
-          orders={filteredOrders}
-          selectedId={selectedOrderId}
-          onSelect={(order) => setSelectedOrderId(order._id)}
-        />
+  tables={filteredOrders}   // ← array of order objects, matches what this file expects
+  selectedId={selectedOrderId}
+  onSelect={(order) => setSelectedOrderId(order._id)}
+/>
 
         <OrderDetail order={selectedOrder} />
       </div>
