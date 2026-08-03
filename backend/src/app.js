@@ -6,6 +6,7 @@ const tableRoute=require("./routes/table.routes")
 const menuRoute=require("./routes/menu.routes")
 const customerRoute=require("./routes/customer.routes")
 const profileRoute=require("./routes/profile.routes")
+const hotelOrdersRoute=require("./routes/hotelorders.routes")
 const path=require("path")
 const cors=require("cors")
 const app=express();
@@ -29,4 +30,5 @@ app.use("/api/table",tableRoute);
 app.use("/api/menu",menuRoute)
 app.use("/api/customer",customerRoute);
 app.use('/api/profile', profileRoute);
+app.use('/api/hotelOrders', hotelOrdersRoute);
 module.exports=app;

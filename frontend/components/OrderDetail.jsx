@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import axios from "axios";
 import {
   Check,
@@ -27,110 +27,58 @@ function StatusBadge({ status }) {
   );
 }
 
-const TIMELINE_STEPS = ["Order Placed", "In Kitchen", "Ready", "Served", "Completed"];
-
-function OrderTimeline({ statusHistory = [] }) {
-  return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-      {TIMELINE_STEPS.map((step, idx) => {
-        const entry = statusHistory[idx];
-        const isDone = !!entry;
-        const isLast = idx === TIMELINE_STEPS.length - 1;
-
-        return (
-          <div key={step} className="flex gap-3">
-            <div className="flex flex-col items-center">
-              <span
-                className={`flex h-5 w-5 flex-none items-center justify-center rounded-full ${
-                  isDone ? "bg-green-500" : "bg-gray-200"
-                }`}
-              >
-                {isDone && <Check size={12} className="text-white" />}
-              </span>
-              {!isLast && (
-                <span
-                  className={`w-px flex-1 ${isDone ? "bg-green-300" : "bg-gray-200"}`}
-                  style={{ minHeight: "28px" }}
-                />
-              )}
-            </div>
-
-            <div className={isLast ? "" : "pb-6"}>
-              <p className={`text-sm font-medium ${isDone ? "text-gray-900" : "text-gray-400"}`}>
-                {step}
-              </p>
-              <p className="text-xs text-gray-400">{entry || "—"}</p>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
+// No top-level order.status in the backend response, so derive one
+// from the items — same rule as TablesPanel (any item Preparing → order shows Preparing).
+function getOrderStatus(order) {
+  if (!Array.isArray(order.items) || order.items.length === 0) return "Active";
+  if (order.items.some((i) => i.status === "Preparing")) return "Preparing";
+  if (order.items.every((i) => i.status === "Served")) return "Served";
+  if (order.items.some((i) => i.status === "Ready")) return "Ready";
+  return order.items[0].status || "Active";
 }
 
-const OrderDetail = ({ orderId }) => {
-  const [order, setOrder] = useState(null);
-  const [status, setStatus] = useState("loading"); // loading | error | success
+const OrderDetail = ({ order }) => {
+  const [localOrder, setLocalOrder] = useState(order);
 
-  async function fetchOrder() {
-    if (!orderId) return;
-    setStatus("loading");
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/api/orders/get_order/${orderId}`,
-        { withCredentials: true }
-      );
-      if (response.data.success) {
-        setOrder(response.data.data);
-        setStatus("success");
-      } else {
-        setStatus("error");
-      }
-    } catch (err) {
-      console.log(err);
-      setStatus("error");
-    }
+  // Keep localOrder in sync whenever a different order is selected
+  if (order && localOrder?._id !== order._id) {
+    setLocalOrder(order);
   }
 
-  useEffect(() => {
-    fetchOrder();
-  }, [orderId]);
+  // async function updateItemStatus(itemIndex, newStatus) {
+  //   // optimistic update — items have no _id, so we update by index
+  //   setLocalOrder((prev) => ({
+  //     ...prev,
+  //     items: prev.items.map((it, idx) =>
+  //       idx === itemIndex ? { ...it, status: newStatus } : it
+  //     ),
+  //   }));
 
-  async function updateItemStatus(itemId, newStatus) {
-    // optimistic update
-    setOrder((prev) => ({
-      ...prev,
-      items: prev.items.map((it) =>
-        it._id === itemId ? { ...it, status: newStatus } : it
-      ),
-    }));
+  //   try {
+  //     await axios.patch(
+  //       `${import.meta.env.VITE_BACKEND_URL}api/hotelOrders /update_item_status/${order._id}/${itemIndex}`,
+  //       { status: newStatus },
+  //       { withCredentials: true }
+  //     );
+  //   } catch (err) {
+  //     console.log(err);
+  //     setLocalOrder(order); // revert on failure
+  //   }
+  // }
 
-    try {
-      await axios.patch(
-        `http://localhost:3000/api/orders/update_item_status/${orderId}/${itemId}`,
-        { status: newStatus },
-        { withCredentials: true }
-      );
-    } catch (err) {
-      console.log(err);
-      fetchOrder(); // revert on failure
-    }
-  }
+  // async function updateOrderStatus(newStatus) {
+  //   try {
+  //     await axios.patch(
+  //       `http://localhost:3000/api/orders/update_status/${order._id}`,
+  //       { status: newStatus },
+  //       { withCredentials: true }
+  //     );
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // }
 
-  async function updateOrderStatus(newStatus) {
-    try {
-      await axios.patch(
-        `http://localhost:3000/api/orders/update_status/${orderId}`,
-        { status: newStatus },
-        { withCredentials: true }
-      );
-      fetchOrder();
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
-  if (!orderId) {
+  if (!order) {
     return (
       <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 bg-white py-24 text-center">
         <ClipboardList size={28} className="text-gray-300" />
@@ -141,34 +89,13 @@ const OrderDetail = ({ orderId }) => {
     );
   }
 
-  if (status === "loading") {
-    return (
-      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-        <div className="h-6 w-32 animate-pulse rounded-md bg-gray-200" />
-        <div className="mt-4 space-y-3">
-          <div className="h-14 animate-pulse rounded-lg bg-gray-100" />
-          <div className="h-14 animate-pulse rounded-lg bg-gray-100" />
-          <div className="h-14 animate-pulse rounded-lg bg-gray-100" />
-        </div>
-      </div>
-    );
-  }
-
-  if (status === "error" || !order) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white py-16 text-center shadow-sm">
-        <p className="text-sm font-medium text-gray-500">
-          Couldn't load this order
-        </p>
-        <button
-          onClick={fetchOrder}
-          className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600"
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
+  const displayOrder = localOrder || order;
+  const status = getOrderStatus(displayOrder);
+  const tableNumber = displayOrder.tableId?.tableNumber ?? "—";
+  const tableLocation = displayOrder.tableId?.location;
+  const createdAt = displayOrder.createdAt
+    ? new Date(displayOrder.createdAt).toLocaleString()
+    : "";
 
   return (
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_260px]">
@@ -176,12 +103,13 @@ const OrderDetail = ({ orderId }) => {
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
         <div className="mb-1 flex items-center gap-3">
           <h2 className="text-xl font-bold text-gray-900">
-            Table {order.tableNumber}
+            Table {tableNumber}
           </h2>
-          <StatusBadge status={order.status} />
+          <StatusBadge status={status} />
         </div>
         <p className="mb-5 text-sm text-gray-500">
-          Order ID: {order.orderCode} &nbsp;•&nbsp; {order.time}
+          {tableLocation && <>{tableLocation} &nbsp;•&nbsp; </>}
+          {createdAt}
         </p>
 
         <div className="border-t border-gray-200" />
@@ -195,9 +123,9 @@ const OrderDetail = ({ orderId }) => {
           </div>
 
           <div className="space-y-1">
-            {order.items.map((item) => (
+            {displayOrder.items.map((item, idx) => (
               <div
-                key={item._id}
+                key={idx}
                 className="grid grid-cols-[1fr_60px_120px] items-center gap-4 rounded-lg px-2 py-2.5 transition-colors hover:bg-gray-50"
               >
                 <div className="flex items-center gap-3">
@@ -205,40 +133,35 @@ const OrderDetail = ({ orderId }) => {
                     <UtensilsCrossed size={16} />
                   </span>
                   <div className="min-w-0">
+                    {/* No item name in backend response — only menuId (raw id).
+                        Falling back to variantName until menu is populated. */}
                     <p className="truncate text-[15px] font-medium text-gray-900">
-                      {item.name}
+                      {item.name || item.variantName || "Item"}
                     </p>
-                    <p className="text-xs text-gray-500">{item.variant}</p>
+                    <p className="text-xs text-gray-500">
+                      {item.variantName} • ₹{item.finalprice ?? item.price}
+                    </p>
                   </div>
                 </div>
 
-                <span className="text-sm text-gray-700">{item.qty}</span>
+                <span className="text-sm text-gray-700">{item.quantity}</span>
 
                 <ItemStatusDropdown
                   value={item.status}
-                  onChange={(newStatus) => updateItemStatus(item._id, newStatus)}
+                  onChange={(newStatus) => updateItemStatus(idx, newStatus)}
                 />
               </div>
             ))}
           </div>
         </div>
 
-        {/* Notes */}
-        {order.notes?.length > 0 && (
-          <div className="mt-5 border-t border-gray-200 pt-5">
-            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-700">
-              <ClipboardList size={16} className="text-gray-400" />
-              Order Notes
-            </div>
-            <ul className="space-y-1 pl-1">
-              {order.notes.map((note, idx) => (
-                <li key={idx} className="text-sm text-gray-600">
-                  • {note}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        {/* Total */}
+        <div className="mt-4 flex items-center justify-between border-t border-gray-200 pt-4">
+          <span className="text-sm font-semibold text-gray-700">Total</span>
+          <span className="text-sm font-bold text-gray-900">
+            ₹{displayOrder.totalAmount}
+          </span>
+        </div>
 
         {/* Actions */}
         <div className="mt-6 flex flex-wrap gap-3 border-t border-gray-200 pt-5">
@@ -267,8 +190,6 @@ const OrderDetail = ({ orderId }) => {
           </button>
         </div>
       </div>
-
-      <OrderTimeline statusHistory={order.statusHistory} />
     </div>
   );
 };

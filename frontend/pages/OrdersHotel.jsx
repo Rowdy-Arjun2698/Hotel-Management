@@ -6,8 +6,14 @@ import OrderDetail from "../components/OrderDetail";
 
 const STATUS_FILTERS = ["All Status", "Preparing", "Ready", "Active", "Cancelled"];
 
+// An order counts as "Preparing" if any of its items are still Preparing.
+// (Change to .every(...) instead of .some(...) if you want ALL items
+// to be Preparing before it shows up.)
+const isPreparing = (order) =>
+  Array.isArray(order.items) && order.items.some((i) => i.status === "Preparing");
+
 const OrdersHotel = () => {
-  const [tables, setTables] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [statusFilter, setStatusFilter] = useState("All Status");
   const [filterOpen, setFilterOpen] = useState(false);
@@ -15,13 +21,13 @@ const OrdersHotel = () => {
   async function fetchActiveTables() {
     try {
       const response = await axios.get(
-        "http://localhost:3000/api/orders/active_tables",
+        `${import.meta.env.VITE_BACKEND_URL}api/hotelOrders/active_tables`,
         { withCredentials: true }
       );
       if (response.data.success) {
-        // backend should already return only tables with an active order,
-        // sorted by order creation time (oldest/first order → top)
-        setTables(response.data.data);
+        // backend returns orders, each with a nested tableId object
+        // and its own items[] (each item has its own status)
+        setOrders(response.data.orders || response.data.data);
       }
     } catch (err) {
       console.log(err);
@@ -32,10 +38,15 @@ const OrdersHotel = () => {
     fetchActiveTables();
   }, []);
 
-  const filteredTables =
-    statusFilter === "All Status"
-      ? tables
-      : tables.filter((t) => t.status === statusFilter);
+  // Panel is hard-locked to orders that are currently Preparing
+  const preparingOrders = orders.filter(isPreparing);
+
+  const filteredOrders =
+    statusFilter === "All Status" || statusFilter === "Preparing"
+      ? preparingOrders
+      : []; // any other filter has nothing to show, since panel = Preparing only
+
+  const selectedOrder = orders.find((o) => o._id === selectedOrderId);
 
   return (
     <div className="min-h-full w-full bg-gray-100 px-8 py-8">
@@ -51,9 +62,9 @@ const OrdersHotel = () => {
         <div className="flex items-center gap-4">
           <button className="relative flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 shadow-sm transition hover:bg-gray-50">
             <Bell size={18} />
-            {tables.length > 0 && (
+            {preparingOrders.length > 0 && (
               <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[11px] font-semibold text-white">
-                {tables.length}
+                {preparingOrders.length}
               </span>
             )}
           </button>
@@ -99,12 +110,12 @@ const OrdersHotel = () => {
       {/* Main layout */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_1fr]">
         <TablesPanel
-          tables={filteredTables}
+          orders={filteredOrders}
           selectedId={selectedOrderId}
-          onSelect={(table) => setSelectedOrderId(table.orderId)}
+          onSelect={(order) => setSelectedOrderId(order._id)}
         />
 
-        <OrderDetail orderId={selectedOrderId} />
+        <OrderDetail order={selectedOrder} />
       </div>
     </div>
   );

@@ -13,6 +13,7 @@ import { CgProfile } from "react-icons/cg";
 import { NavLink, useNavigate } from "react-router-dom";
 import axios from "axios";
 
+
 const navLinkClass = ({ isActive }) =>
   `group relative w-full h-[10%] flex justify-center items-center gap-3 rounded-lg cursor-pointer font-medium text-[15px] transition-all duration-300 ease-out overflow-hidden
   ${
@@ -32,8 +33,13 @@ const Sidebar = () => {
 
   return (
     <div className="side w-full h-full bg-transparent flex flex-col">
-      <div className="logo w-full h-[10%] bg-transparent flex justify-center items-center">
-        <span className="bg-red-500 p-3 m-3">Only for the logo</span>
+      <div className="logo w-auto h-auto bg-transparent flex justify-center items-center">
+        
+        <img
+        src="../assets/Logo.svg"
+        alt="OrderBridge"
+        className="w-auto h-auto fill-transparent"
+      />
       </div>
 
       <div className="featurelist w-full h-[90%] bg-transparent flex flex-col justify-start items-center text-white p-4 gap-4">
