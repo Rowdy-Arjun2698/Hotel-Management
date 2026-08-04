@@ -14,6 +14,7 @@ const statusStyles = {
   Ready: "bg-green-50 text-green-600",
   Served: "bg-blue-50 text-blue-600",
   Cancelled: "bg-red-50 text-red-600",
+  Active: "bg-gray-100 text-gray-500",
 };
 
 function StatusBadge({ status }) {
@@ -71,15 +72,8 @@ const FoodTypeMark = ({ type, dim = false }) => {
   );
 };
 
-// No top-level order.status in the backend response, so derive one
-// from the items — same rule as TablesPanel (any item Preparing → order shows Preparing).
-function getOrderStatus(order) {
-  if (!Array.isArray(order.items) || order.items.length === 0) return "Active";
-  if (order.items.some((i) => i.status === "Preparing")) return "Preparing";
-  if (order.items.every((i) => i.status === "Served")) return "Served";
-  if (order.items.some((i) => i.status === "Ready")) return "Ready";
-  return order.items[0].status || "Active";
-}
+// REMOVED: getOrderStatus() — status now comes straight from the backend
+// via displayOrder.orderStatus, so no frontend derivation is needed.
 
 const OrderDetail = ({ order }) => {
   const [localOrder, setLocalOrder] = useState(order);
@@ -117,6 +111,9 @@ const OrderDetail = ({ order }) => {
         { status: newStatus },
         { withCredentials: true }
       );
+      // Keep localOrder.orderStatus in sync so the badge updates immediately
+      // without waiting for the parent to refetch/re-pass the order prop.
+      setLocalOrder((prev) => ({ ...prev, orderStatus: newStatus }));
     } catch (err) {
       console.log(err);
     }
@@ -134,12 +131,26 @@ const OrderDetail = ({ order }) => {
   }
 
   const displayOrder = localOrder || order;
-  const status = getOrderStatus(displayOrder);
+
+  // Use the backend-provided orderStatus directly instead of deriving it.
+  const status = displayOrder.orderStatus;
+
   const tableNumber = displayOrder.tableId?.tableNumber ?? "—";
   const tableLocation = displayOrder.tableId?.location;
   const createdAt = displayOrder.createdAt
     ? new Date(displayOrder.createdAt).toLocaleString()
     : "";
+
+  // Button enable/disable logic based on item statuses:
+  // - "Mark as Ready" is only allowed once every item is Ready or Served
+  //   (i.e. nothing is still Preparing/Cancelled/etc.)
+  // - "Mark as Served" is only allowed once every item is Served.
+  const items = displayOrder.items || [];
+  const canMarkReady =
+    items.length > 0 &&
+    items.every((it) => it.status === "Ready" || it.status === "Served");
+  const canMarkServed =
+    items.length > 0 && items.every((it) => it.status === "Served");
 
   return (
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_260px]">
@@ -167,23 +178,23 @@ const OrderDetail = ({ order }) => {
           </div>
 
           <div className="space-y-1">
-            {displayOrder.items.map((item, idx) => (
+            {items.map((item, idx) => (
               <div
                 key={idx}
                 className="grid grid-cols-[1fr_60px_120px] items-center gap-4 rounded-lg px-2 py-2.5 transition-colors hover:bg-gray-50"
               >
                 <div className="flex items-center gap-3">
                   <span className="flex h-11 w-11 flex-none items-center justify-center overflow-hidden rounded-lg bg-orange-50 text-orange-400">
-  {item.menuId?.image ? (
-    <img
-      src={`http://localhost:3000${item.menuId.image}`}
-      alt={item.menuId?.dishName || "Item"}
-      className="h-full w-full object-cover"
-    />
-  ) : (
-    <UtensilsCrossed size={16} />
-  )}
-</span>
+                    {item.menuId?.image ? (
+                      <img
+                        src={`http://localhost:3000${item.menuId.image}`}
+                        alt={item.menuId?.dishName || "Item"}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <UtensilsCrossed size={16} />
+                    )}
+                  </span>
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
                       <FoodTypeMark type={normalizeFoodType(item.menuId?.foodType)} />
@@ -220,8 +231,12 @@ const OrderDetail = ({ order }) => {
         <div className="mt-6 border-t border-gray-200 pt-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <button
-              onClick={() => updateOrderStatus("Ready")}
-              className="group flex flex-1 items-center justify-center gap-2 rounded-xl bg-green-600 py-3 text-sm font-semibold text-white shadow-sm shadow-green-600/20 transition-all duration-150 hover:bg-green-700 hover:shadow-md hover:shadow-green-600/25 active:scale-[0.98]"
+              onClick={() => canMarkReady && updateOrderStatus("Ready")}
+              disabled={!canMarkReady}
+              // Disabled styling: reduced opacity + cursor-not-allowed,
+              // and hover/active effects are suppressed via disabled: variants
+              // so the button doesn't look interactive when it can't be used.
+              className={`group flex flex-1 items-center justify-center gap-2 rounded-xl bg-green-600 py-3 text-sm font-semibold text-white shadow-sm shadow-green-600/20 transition-all duration-150 hover:bg-green-700 hover:shadow-md hover:shadow-green-600/25 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green-600 disabled:hover:shadow-sm disabled:active:scale-100`}
             >
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20">
                 <Check size={12} strokeWidth={3} />
@@ -234,8 +249,9 @@ const OrderDetail = ({ order }) => {
             </button>
 
             <button
-              onClick={() => updateOrderStatus("Served")}
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-orange-200 bg-orange-50 py-3 text-sm font-semibold text-orange-600 transition-all duration-150 hover:border-orange-300 hover:bg-orange-100 active:scale-[0.98]"
+              onClick={() => canMarkServed && updateOrderStatus("Served")}
+              disabled={!canMarkServed}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-xl border border-orange-200 bg-orange-50 py-3 text-sm font-semibold text-orange-600 transition-all duration-150 hover:border-orange-300 hover:bg-orange-100 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-orange-200 disabled:hover:bg-orange-50 disabled:active:scale-100`}
             >
               <UtensilsCrossed size={15} />
               Mark as Served

@@ -7,7 +7,10 @@ const customerAuth = require("../middleware/customerAuth.middleware");
 router.get('/start/:id',allfetch)
 router.get('/menu',customerAuth,fetchMenu)
 router.get('/orders',customerAuth,fetchOrder)
-router.post('/order/confirm',customerAuth,confirmOrder)
+router.post("/order/confirm", (req, res, next) => {
+    console.log("Reached confirm route");
+    next();
+}, customerAuth, confirmOrder);
 
 
 

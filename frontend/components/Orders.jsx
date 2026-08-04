@@ -88,6 +88,17 @@ const Orders = () => {
           {hotel?.hotelName ? `${hotel.hotelName} · ` : ""}
           {table?.tableNumber ? `Table ${table.tableNumber}` : "Table"}
         </p>
+        {order && (
+  <div className="mt-2">
+    <span
+      className={`text-xs font-semibold px-3 py-1 rounded-full ${
+        STATUS_STYLES[order.orderStatus] || "bg-slate-100 text-slate-500"
+      }`}
+    >
+      Order Status: {STATUS_LABELS[order.orderStatus] || order.orderStatus}
+    </span>
+  </div>
+)}
       </div>
 
       {error && (

@@ -5,7 +5,7 @@ const Table = require("../models/tables.model");
 const Hotel = require("../models/hotel_info.model");
 const Session = require("../models/session.model");
 const Order = require("../models/orders.model");
-
+const calculateOrderStatus = require("../utils/orderStatus");
 async function allfetch(req, res) {
   try {
     const { id } = req.params;
@@ -183,10 +183,17 @@ async function confirmOrder(req, res) {
   const order = await Order.findOne({ sessionId: req.session._id });
 
 if (!order) {
-  return res.status(404).json({
-    success: false,
-    message: "Order not found",
-  });
+    order = await Order.create({
+        hotelId: req.hotel._id,
+        tableId: req.table._id,
+        sessionId: req.session._id,
+        items: [],
+        totalAmount: 0,
+        orderStatus: "Preparing",
+    });
+
+    req.session.orderId = order._id;
+    await req.session.save();
 }
 
 const orderItems = items.map((item) => ({

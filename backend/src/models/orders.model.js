@@ -58,14 +58,15 @@ const orderSchema = new mongoose.Schema(
 
     items: [orderItemSchema],
 
-    totalAmount: {
-      type: Number,
-     
+    totalAmount: Number,
+
+    orderStatus: {
+      type: String,
+      enum: ["Preparing", "Ready", "Served", "Cancelled"],
+      default: "Preparing",
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 module.exports = mongoose.model("Order", orderSchema);
