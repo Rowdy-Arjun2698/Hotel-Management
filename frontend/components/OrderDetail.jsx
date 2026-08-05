@@ -94,7 +94,7 @@ const OrderDetail = ({ order }) => {
 
     try {
       await axios.patch(
-        `${import.meta.env.VITE_BACKEND_URL}api/hotelOrders/update_item_status/${order._id}/${itemIndex}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/hotelOrders/update_item_status/${order._id}/${itemIndex}`,
         { status: newStatus },
         { withCredentials: true }
       );
@@ -107,7 +107,7 @@ const OrderDetail = ({ order }) => {
   async function updateOrderStatus(newStatus) {
     try {
       await axios.patch(
-        `${import.meta.env.VITE_BACKEND_URL}api/hotelOrders/update_status/${order._id}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/hotelOrders/update_status/${order._id}`,
         { status: newStatus },
         { withCredentials: true }
       );
