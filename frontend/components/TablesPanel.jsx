@@ -35,8 +35,18 @@ function getOrderStatus(order) {
   return order.items[0].status || "Active";
 }
 
+// NEW: an order stays visible on the tables panel as long as at least
+// one item still needs to be served — i.e. it's not yet Served and
+// not Cancelled. Once every item is Served/Cancelled, it drops off.
+function isOrderStillPending(order) {
+  const items = order.items || [];
+  if (items.length === 0) return false;
+  return items.some((i) => i.status !== "Served" && i.status !== "Cancelled");
+}
+
 const TablesPanel = ({ tables, selectedId, onSelect }) => {
-  const orders = tables || [];
+  // NEW: filter down to orders that still have unserved items.
+  const orders = (tables || []).filter(isOrderStillPending);
 
   return (
     <div className="h-fit rounded-xl border border-gray-200 bg-white p-4 shadow-sm">

@@ -213,6 +213,7 @@ const addedAmount = orderItems.reduce(
 
 order.totalAmount = (order.totalAmount || 0) + addedAmount;
 
+order.orderStatus = calculateOrderStatus(order.items);
 await order.save();
 
     return res.status(200).json({
