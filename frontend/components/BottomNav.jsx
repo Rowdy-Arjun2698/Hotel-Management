@@ -14,10 +14,10 @@ if(!tableId){
     return <Loader message="Loading restaurant..." />;
 }
 const navItems = [
-  { to: `/customer/${tableId}/cmenu`, label: "Menu", icon: UtensilsCrossed, end: true },
+  { to: `/customer/${tableId}/Cmenu`, label: "Menu", icon: UtensilsCrossed, end: true },
   { to: `/customer/${tableId}/COrders`, label: "Orders", icon: Receipt },
-  { to: "/call-waiter", label: "Call Waiter", icon: ConciergeBell },
-  { to: "/more", label: "More", icon: MoreHorizontal },
+  { to: `/customer/${tableId}/call-waiter`, label: "Call Waiter", icon: ConciergeBell },
+  { to: `/customer/${tableId}/more`, label: "More", icon: MoreHorizontal },
 ];
   return (
     <nav className="flex items-center justify-around px-2 pt-2.5 pb-1.5">

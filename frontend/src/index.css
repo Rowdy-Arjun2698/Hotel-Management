@@ -1,1 +1,56 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --font-display: 'Sora', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+body {
+  font-family: var(--font-body);
+}
+
+@keyframes float-y {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-14px); }
+}
+
+@keyframes float-y-slow {
+  0%, 100% { transform: translateY(0px) rotate(-1deg); }
+  50% { transform: translateY(-10px) rotate(1deg); }
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(224,123,57,0.55); }
+  100% { box-shadow: 0 0 0 16px rgba(224,123,57,0); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 30px 70px -25px rgba(224,123,57,0.28); }
+  50% { box-shadow: 0 30px 90px -18px rgba(224,123,57,0.45); }
+}
+
+@keyframes fade-slide-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes candle-flicker {
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px 2px rgba(224,123,57,0.6); }
+  50% { opacity: 0.55; box-shadow: 0 0 4px 1px rgba(224,123,57,0.35); }
+}
+
+@keyframes leaf-sway {
+  0%, 100% { transform: rotate(-4deg); }
+  50% { transform: rotate(4deg); }
+}
+
+@keyframes led-glow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes chart-draw {
+  from { stroke-dashoffset: 200; }
+  to { stroke-dashoffset: 0; }
+}

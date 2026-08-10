@@ -94,7 +94,7 @@ const Registerform = () => {
         </div>
         <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
           <div
-            className="h-full bg-[#d2873aff] transition-all duration-300"
+           className="h-full bg-[#D97B3F] transition-all duration-300"
             style={{ width: `${((step + 1) / groups.length) * 100}%` }}
           />
         </div>
@@ -119,7 +119,7 @@ const Registerform = () => {
                 className={`p-3 border rounded-lg focus:outline-none focus:ring-2 ${
                   showError
                     ? 'border-red-400 focus:ring-red-400'
-                    : 'border-gray-300 focus:ring-[#d2873aff]'
+                    : 'border-gray-300 focus:ring-[#D97B3F]'
                 }`}
               />
               {showError && (
@@ -144,14 +144,14 @@ const Registerform = () => {
             <button
               type="button"
               onClick={goNext}
-              className="p-3 flex-1 bg-[#d2873aff] text-white rounded-lg cursor-pointer hover:bg-[#c07a2f]"
+className="p-3 flex-1 bg-[#D97B3F] text-white rounded-lg cursor-pointer hover:bg-[#c06a30]"
             >
               Next
             </button>
           ) : (
             <button
               type="submit"
-              className="p-3 flex-1 bg-[#d2873aff] text-white rounded-lg cursor-pointer hover:bg-[#c07a2f]"
+className="p-3 flex-1 bg-[#D97B3F] text-white rounded-lg cursor-pointer hover:bg-[#c06a30]"
             >
               Register
             </button>

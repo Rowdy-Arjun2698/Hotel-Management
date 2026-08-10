@@ -6,6 +6,7 @@ const variantSchema = new mongoose.Schema(
       type: String,
       required: true, // Half, Full, Small, Large
     },
+
     price: {
       type: Number,
       required: true,
@@ -29,11 +30,11 @@ const menuSchema = new mongoose.Schema(
       trim: true,
     },
 
-     categoryId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "catagoryModel",
-    required: true,
-},
+    categoryId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "catagoryModel",
+      required: true,
+    },
 
     description: {
       type: String,
@@ -51,27 +52,45 @@ const menuSchema = new mongoose.Schema(
       required: true,
     },
 
-    variants: [
-      variantSchema,
-    ],
+    variants: [variantSchema],
 
     isAvailable: {
       type: Boolean,
       default: true,
     },
 
+    // Today's sales
     todaySold: {
       type: Number,
       default: 0,
       min: 0,
     },
 
+    // Lifetime sales
     totalSold: {
       type: Number,
       default: 0,
       min: 0,
     },
 
+    // Date on which todaySold was last updated
+    todaySoldDate: {
+      type: Date,
+      default: Date.now,
+    },
+
+    ratingSum: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    averageRating: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5,
+    },
   },
   {
     timestamps: true,

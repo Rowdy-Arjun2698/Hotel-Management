@@ -15,6 +15,13 @@ import OrdersHotel from "../pages/OrdersHotel";
 import Profile from "../pages/Profile";
 import Dashboard from "../pages/Dashboard"; 
 
+import MorePage from "../pages/MorePage";
+import MyBillPage from "../pages/MyBillPage";
+import FeedbackPage from "../pages/FeedbackPage";
+import NotificationsPage from "../pages/NotificationsPage";
+import HelpPage from "../pages/HelpPage";
+import AboutPage from "../pages/AboutPage";
+
 const router=createBrowserRouter([
     {
     element: <Authlayout />,
@@ -67,25 +74,17 @@ const router=createBrowserRouter([
       <CustomerLayout />
     </CustomerProvider>
   ),
-  children: [
-    {
-      index: true,
-      element: <Welcome />
-    },
-    {
-      path: "Cmenu",
-      element: <CustMenu />
-    },
-    // {
-    //   path: "cart",
-    //   element: <Cart />
-    // },
-     {
-      path: "COrders",
-     element: <CustOrder />
-     }
-  
-  ]
+ children: [
+  { index: true, element: <Welcome /> },
+  { path: "Cmenu", element: <CustMenu /> },
+  { path: "COrders", element: <CustOrder /> },
+  { path: "more", element: <MorePage /> },
+  { path: "more/bill", element: <MyBillPage /> },
+  { path: "more/feedback", element: <FeedbackPage /> },
+  { path: "notifications", element: <NotificationsPage /> },
+  { path: "more/help", element: <HelpPage /> },
+  { path: "more/about", element: <AboutPage /> },
+]
 }
 ])
 

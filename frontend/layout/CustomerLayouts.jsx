@@ -1,91 +1,83 @@
 import React from "react";
-import { useState,useEffect,useContext } from "react";
-import { Outlet, useNavigate,useParams } from "react-router-dom";
+import { useState, useEffect, useContext } from "react";
+import { Outlet, useNavigate, useParams, useLocation } from "react-router-dom";
 import Header from "../components/Header";
+import BackHeader from "../components/BackHeader";
 import BottomNav from "../components/BottomNav";
 import { CustomerContext } from "../context/CustomerContext";
 import Loader from "../components/Loader";
 import axios from "axios";
 
+// Map last path segment -> header title. "" means Welcome (root, no header override needed if you want default Header there too)
+const SUBPAGE_TITLES = {
+  more: "More",
+  bill: "My Bill",
+  feedback: "Give Feedback",
+  notifications: "Notifications",
+  help: "Help",
+  about: "About",
+};
+
 const CustomerLayout = () => {
-    const url = import.meta.env.VITE_BACKEND_URL;
-    
+  const url = import.meta.env.VITE_BACKEND_URL;
 
   const navigate = useNavigate();
-
+  const location = useLocation();
   const { tableId } = useParams();
-  
 
-  const [loading,setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
+  const { setHotel, setTable, setSession } = useContext(CustomerContext);
 
-  const {
-    setHotel,
-    setTable,
-    setSession
-  } = useContext(CustomerContext);
-
-
-
-  useEffect(()=>{
-
-    const fetchCustomerData = async()=>{
-
-      try{
-
-        const res = await axios.get( `${url}/api/customer/start/${tableId}`,
-             {
-    withCredentials:true
-  }
-        );
-
+  useEffect(() => {
+    const fetchCustomerData = async () => {
+      try {
+        const res = await axios.get(`${url}/api/customer/start/${tableId}`, {
+          withCredentials: true,
+        });
 
         setHotel(res.data.hotel);
         setTable(res.data.table);
         setSession(res.data.session);
-            console.log(res.data.table);
-
-      }
-      catch(err){
+      } catch (err) {
         console.log(err);
-      }
-      finally{
+      } finally {
         setLoading(false);
       }
+    };
 
-    }
-
-
-    if(tableId){
+    if (tableId) {
       fetchCustomerData();
     }
+  }, [tableId]);
 
-
-  },[tableId]);
-
-
-
-
-  if(loading){
-     return <Loader message="Fetching Table data"/>
+  if (loading) {
+    return <Loader message="Fetching Table data" />;
   }
 
+  // Get last segment of the path (works regardless of tableId value)
+  const segments = location.pathname.split("/").filter(Boolean); // e.g. ["customer", "T25", "more", "bill"]
+  const lastSegment = segments[segments.length - 1]?.toLowerCase();
+  const subpageTitle = SUBPAGE_TITLES[lastSegment];
+
   return (
-    
     <div className="h-screen w-screen bg-slate-100 flex justify-center">
       {/* Mobile Container */}
       <div className="relative h-screen w-full max-w-md bg-white shadow-2xl shadow-slate-300/50 overflow-hidden sm:my-4 sm:h-[calc(100vh-2rem)] sm:rounded-[2.5rem] sm:border sm:border-slate-200">
-
         {/* Fixed Header */}
         <div
           className="sticky top-0 z-20 bg-white border-b border-slate-100"
           style={{ paddingTop: "env(safe-area-inset-top)" }}
         >
-          <Header
-            notificationCount={2}
-            onMenuClick={() => {}}
-            onBellClick={() => navigate("/notifications")}
-          />
+          {subpageTitle ? (
+            <BackHeader title={subpageTitle} />
+          ) : (
+            <Header
+              notificationCount={2}
+              onMenuClick={() => {}}
+              onBellClick={() => navigate(`/customer/${tableId}/notifications`)}
+            />
+          )}
         </div>
 
         {/* Scrollable Content */}
@@ -102,7 +94,6 @@ const CustomerLayout = () => {
         </div>
       </div>
     </div>
-  
   );
 };
 

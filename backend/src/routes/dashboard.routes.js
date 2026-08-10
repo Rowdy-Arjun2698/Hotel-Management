@@ -1,0 +1,13 @@
+const express= require("express")
+const router=express.Router()
+const {authotel}=require("../middleware/auth.middleware");
+const { getTopSellingDishes } = require("../controllers/dashboard.controller");
+// const { fetchActiveTables,cancelOrder,updateItemStatus } = require("../controllers/hotel.orders.controller");
+
+// router.get('/active_tables', authotel, fetchActiveTables);
+// router.patch("/update_item_status/:orderId/:itemIndex", authotel, updateItemStatus);
+// router.patch("/cancel_order/:orderId", authotel, cancelOrder);
+router.get('/top-selling', authotel,getTopSellingDishes);
+
+
+module.exports=router;

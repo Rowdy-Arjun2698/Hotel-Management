@@ -180,41 +180,93 @@ async function confirmOrder(req, res) {
       });
     }
 
-  const order = await Order.findOne({ sessionId: req.session._id });
+    let order = await Order.findOne({
+      sessionId: req.session._id,
+    });
 
-if (!order) {
-    order = await Order.create({
+    if (!order) {
+      order = await Order.create({
         hotelId: req.hotel._id,
         tableId: req.table._id,
         sessionId: req.session._id,
         items: [],
         totalAmount: 0,
         orderStatus: "Preparing",
-    });
+      });
 
-    req.session.orderId = order._id;
-    await req.session.save();
-}
+      req.session.orderId = order._id;
+      await req.session.save();
+    }
 
-const orderItems = items.map((item) => ({
-  menuId: item.menuId,
-  variantName: item.variantName,
-  price: item.price,
-  finalprice: item.finalPrice,
-  quantity: item.quantity,
-}));
+    const orderItems = items.map((item) => ({
+      menuId: item.menuId,
+      variantName: item.variantName,
+      price: item.price,
+      finalprice: item.finalPrice,
+      quantity: item.quantity,
+    }));
 
-order.items.push(...orderItems);
+    order.items.push(...orderItems);
 
-const addedAmount = orderItems.reduce(
-  (sum, item) => sum + item.finalprice * item.quantity,
-  0
-);
+    const addedAmount = orderItems.reduce(
+      (sum, item) => sum + item.finalprice * item.quantity,
+      0
+    );
 
-order.totalAmount = (order.totalAmount || 0) + addedAmount;
+    order.totalAmount = (order.totalAmount || 0) + addedAmount;
 
-order.orderStatus = calculateOrderStatus(order.items);
-await order.save();
+    order.orderStatus = calculateOrderStatus(order.items);
+
+    await order.save();
+
+    // ================================
+    // UPDATE TODAY SOLD & TOTAL SOLD
+    // ================================
+
+    const sales = {};
+
+    // Combine quantity of same dish
+    // Variant does NOT matter here
+    for (const item of orderItems) {
+      if (!sales[item.menuId]) {
+        sales[item.menuId] = 0;
+      }
+
+      sales[item.menuId] += item.quantity;
+    }
+
+    const today = new Date();
+
+    for (const menuId in sales) {
+      const menu = await Menu.findById(menuId);
+
+      if (!menu) {
+        continue;
+      }
+
+      const quantity = sales[menuId];
+
+      const lastSoldDate = new Date(menu.todaySoldDate);
+
+      const isSameDay =
+        today.getFullYear() === lastSoldDate.getFullYear() &&
+        today.getMonth() === lastSoldDate.getMonth() &&
+        today.getDate() === lastSoldDate.getDate();
+
+      if (isSameDay) {
+        // Same day → increase today's sales
+        menu.todaySold += quantity;
+      } else {
+        // New day → start today's sales
+        menu.todaySold = quantity;
+        menu.todaySoldDate = today;
+      }
+
+      // Lifetime sales
+      menu.totalSold += quantity;
+
+      await menu.save();
+    }
 
     return res.status(200).json({
       message: "Order confirmed successfully",

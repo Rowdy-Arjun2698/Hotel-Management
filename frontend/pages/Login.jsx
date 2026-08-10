@@ -1,29 +1,55 @@
 import React from 'react'
-import {useState} from 'react'
+import { useState } from 'react'
 import Loginform from '../components/Loginform'
 import Registerform from '../components/Registerform'
+import HeroPanel from '../components/HeroPanel'
+
 const Login = () => {
-  const [space, setSpace] = useState({})
   const [isLogin, setIsLogin] = useState(true)
 
   return (
-    <>
-    <div className="big min-h-screen bg-white flex ">
-        <div className="anoter  w-[45vw] bg-white  flex justify-center items-center ">
-         
-            <div className={'add w-[60%] h-[80%] bg-gray-100 border-2 shadow-[#d2873aff] shadow-2xl border-gray-300 rounded-2xl flex flex-col  items-center gap-8 ${isLogin ? "" : "space-y-4"}'}>
-                  <div className="another w-[80%] h-[10%] mt-4 bg-gra flex flex-row justify-center items-center border-gray-300 border-2 rounded-2xl">
-                <button className={`p-3 ${isLogin ? "bg-[#d2873aff]" : "bg-transparent"} rounded-2xl h-full w-[50%] text-1.5xl  cursor-pointer`} onClick={() => setIsLogin(true)}>Log in</button>
-                <button className={`p-3 ${isLogin ? "bg-transparent" : "bg-[#d2873aff]"} rounded-2xl h-full w-[50%] text-1.5xl  cursor-pointer`} onClick={() => setIsLogin(false)}>Register</button>
-            </div>
-                    {isLogin ? <Loginform /> : <Registerform />}
-            </div>
+    <div className="flex min-h-screen w-full bg-white">
+      {/* Left: form panel */}
+      <div className="flex w-full items-center justify-center px-6 lg:w-[45vw]">
+        <div
+  className="flex w-full max-w-md flex-col items-center gap-8 rounded-2xl border border-black/5 bg-white p-6"
+  style={{ animation: "glow-pulse 4s ease-in-out infinite" }}
+>
+          {/* animated tab switcher */}
+          <div className="relative mt-4 flex h-12 w-[80%] rounded-2xl border-2 border-gray-300 p-1">
+            <div
+              className="absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-xl bg-[#D97B3F] transition-all duration-300 ease-out"
+              style={{ left: isLogin ? "4px" : "calc(50% + 0px)" }}
+            />
+            <button
+              className={`relative z-10 w-1/2 cursor-pointer rounded-xl text-sm font-semibold transition-colors duration-300 ${
+                isLogin ? "text-white" : "text-gray-500"
+              }`}
+              onClick={() => setIsLogin(true)}
+            >
+              Log in
+            </button>
+            <button
+              className={`relative z-10 w-1/2 cursor-pointer rounded-xl text-sm font-semibold transition-colors duration-300 ${
+                !isLogin ? "text-white" : "text-gray-500"
+              }`}
+              onClick={() => setIsLogin(false)}
+            >
+              Register
+            </button>
+          </div>
+
+          <div key={isLogin ? "login" : "register"} style={{ animation: "fade-slide-in 0.35s ease-out" }} className="w-full">
+            {isLogin ? <Loginform /> : <Registerform />}
+          </div>
         </div>
-        <div className="anoter  w-[55vw] bg-green-400 ">
-          
-        </div>
+      </div>
+
+      {/* Right: animated hero */}
+      <div className="hidden lg:block lg:w-[55vw]">
+        <HeroPanel />
+      </div>
     </div>
-    </>
   )
 }
 
