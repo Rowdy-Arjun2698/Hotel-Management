@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { FileText, Star, Bell, HelpCircle, Info } from "lucide-react";
+import { FileText, Star, Phone, Bell, HelpCircle, Info } from "lucide-react";
 import MoreListItem from "../components/MoreListItem";
 
 const MorePage = () => {
@@ -11,40 +11,48 @@ const MorePage = () => {
       icon: FileText,
       iconBg: "#FEE2E2",
       iconColor: "#DC2626",
-      title: "My Bill",
-      subtitle: "View your bill, charges and payment status",
-      path: "more/bill",
+      title: "Request Bill",
+      subtitle: "Generate your final bill",
+      path: "more/request-bill",
     },
     {
       icon: Star,
       iconBg: "#FEF3C7",
       iconColor: "#D97706",
-      title: "Give Feedback",
-      subtitle: "Rate your experience and help us improve",
+      title: "Rate Your Food",
+      subtitle: "Review dishes you ordered",
       path: "more/feedback",
+    },
+    {
+      icon: Phone,
+      iconBg: "#DBEAFE",
+      iconColor: "#2563EB",
+      title: "Call Waiter",
+      subtitle: "Need any assistance?",
+      path: "more/call-waiter",
     },
     {
       icon: Bell,
       iconBg: "#D1FAE5",
       iconColor: "#059669",
       title: "Notifications",
-      subtitle: "Stay updated with your order and offers",
+      subtitle: "Order & service updates",
       path: "notifications",
     },
     {
       icon: HelpCircle,
-      iconBg: "#DBEAFE",
-      iconColor: "#2563EB",
-      title: "Help",
-      subtitle: "Get help and find answers to common questions",
+      iconBg: "#EDE9FE",
+      iconColor: "#7C3AED",
+      title: "Help & Support",
+      subtitle: "We're here to help",
       path: "more/help",
     },
     {
       icon: Info,
-      iconBg: "#EDE9FE",
-      iconColor: "#7C3AED",
-      title: "About",
-      subtitle: "Know more about Spice Garden",
+      iconBg: "#FCE7F3",
+      iconColor: "#DB2777",
+      title: "About Us",
+      subtitle: "About Spice Garden",
       path: "more/about",
     },
   ];

@@ -143,7 +143,7 @@ function CancelConfirmModal({ title, description, onClose, onConfirm }) {
   );
 }
 
-const OrderDetail = ({ order }) => {
+const OrderDetail = ({ order, onOrderChange }) => {
   const [localOrder, setLocalOrder] = useState(order);
   const [cancelTarget, setCancelTarget] = useState(null);
   const [markingAllReady, setMarkingAllReady] = useState(false);
@@ -153,9 +153,9 @@ const OrderDetail = ({ order }) => {
   }, [order]);
 
   async function updateItemStatus(itemIndex, newStatus, reason) {
-    setLocalOrder((prev) => ({
-      ...prev,
-      items: prev.items.map((it, idx) =>
+    const updatedOrder = {
+      ...localOrder,
+      items: localOrder.items.map((it, idx) =>
         idx === itemIndex
           ? {
               ...it,
@@ -164,7 +164,9 @@ const OrderDetail = ({ order }) => {
             }
           : it
       ),
-    }));
+    };
+    setLocalOrder(updatedOrder);
+    onOrderChange?.(updatedOrder); // let OrdersHotel know immediately
 
     try {
       await axios.patch(
@@ -175,18 +177,21 @@ const OrderDetail = ({ order }) => {
     } catch (err) {
       console.log(err);
       setLocalOrder(order); // revert on failure
+      onOrderChange?.(order); // and tell the parent to revert too
     }
   }
 
   async function cancelOrder(reason) {
-    setLocalOrder((prev) => ({
-      ...prev,
-      items: prev.items.map((it) => ({
+    const updatedOrder = {
+      ...localOrder,
+      items: localOrder.items.map((it) => ({
         ...it,
         status: "Cancelled",
         cancelReason: reason,
       })),
-    }));
+    };
+    setLocalOrder(updatedOrder);
+    onOrderChange?.(updatedOrder);
 
     try {
       await axios.patch(
@@ -197,6 +202,7 @@ const OrderDetail = ({ order }) => {
     } catch (err) {
       console.log(err);
       setLocalOrder(order); // revert on failure
+      onOrderChange?.(order);
     }
   }
 
@@ -211,12 +217,14 @@ const OrderDetail = ({ order }) => {
     setMarkingAllReady(true);
 
     const prevOrder = localOrder;
-    setLocalOrder((prev) => ({
-      ...prev,
-      items: prev.items.map((it) =>
+    const updatedOrder = {
+      ...localOrder,
+      items: localOrder.items.map((it) =>
         it.status !== "Cancelled" ? { ...it, status: "Ready" } : it
       ),
-    }));
+    };
+    setLocalOrder(updatedOrder);
+    onOrderChange?.(updatedOrder);
 
     try {
       await Promise.all(
@@ -231,6 +239,7 @@ const OrderDetail = ({ order }) => {
     } catch (err) {
       console.log(err);
       setLocalOrder(prevOrder); // revert all on failure
+      onOrderChange?.(prevOrder);
     } finally {
       setMarkingAllReady(false);
     }
@@ -251,6 +260,10 @@ const OrderDetail = ({ order }) => {
   const items = displayOrder.items || [];
   const status = deriveOrderStatus(items);
 
+  const visibleItems = items
+    .map((item, idx) => ({ item, idx }))
+    .filter(({ item }) => item.status !== "Served");
+
   const tableNumber = displayOrder.tableId?.tableNumber ?? "—";
   const tableLocation = displayOrder.tableId?.location;
   const createdAt = displayOrder.createdAt
@@ -263,7 +276,6 @@ const OrderDetail = ({ order }) => {
 
   return (
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_260px]">
-      {/* Order card */}
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
         <div className="mb-1 flex items-center gap-3">
           <h2 className="text-xl font-bold text-gray-900">
@@ -278,7 +290,6 @@ const OrderDetail = ({ order }) => {
 
         <div className="border-t border-gray-200" />
 
-        {/* Items */}
         <div className="mt-4">
           <div className="grid grid-cols-[1fr_60px_120px_36px] gap-4 px-2 pb-2 text-xs font-semibold text-gray-500">
             <span>Item</span>
@@ -287,78 +298,86 @@ const OrderDetail = ({ order }) => {
             <span />
           </div>
 
-          <div className="space-y-1">
-            {items.map((item, idx) => {
-              const isCancelled = item.status === "Cancelled";
-              return (
-                <div
-                  key={idx}
-                  className="grid grid-cols-[1fr_60px_120px_36px] items-center gap-4 rounded-lg px-2 py-2.5 transition-colors hover:bg-gray-50"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="flex h-11 w-11 flex-none items-center justify-center overflow-hidden rounded-lg bg-orange-50 text-orange-400">
-                      {item.menuId?.image ? (
-                        <img
-                          src={`http://localhost:3000${item.menuId.image}`}
-                          alt={item.menuId?.dishName || "Item"}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <UtensilsCrossed size={16} />
-                      )}
-                    </span>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <FoodTypeMark type={normalizeFoodType(item.menuId?.foodType)} />
-                        <p
-                          className={`truncate text-[15px] font-medium ${
-                            isCancelled
-                              ? "text-gray-400 line-through"
-                              : "text-gray-900"
-                          }`}
-                        >
-                          {item.menuId?.dishName || "Item"}
+          {visibleItems.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 py-10 text-center">
+              <UtensilsCrossed size={22} className="text-gray-300" />
+              <p className="text-sm text-gray-400">
+                All dishes have been served
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {visibleItems.map(({ item, idx }) => {
+                const isCancelled = item.status === "Cancelled";
+                return (
+                  <div
+                    key={idx}
+                    className="grid grid-cols-[1fr_60px_120px_36px] items-center gap-4 rounded-lg px-2 py-2.5 transition-colors hover:bg-gray-50"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-11 w-11 flex-none items-center justify-center overflow-hidden rounded-lg bg-orange-50 text-orange-400">
+                        {item.menuId?.image ? (
+                          <img
+                            src={`http://localhost:3000${item.menuId.image}`}
+                            alt={item.menuId?.dishName || "Item"}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <UtensilsCrossed size={16} />
+                        )}
+                      </span>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <FoodTypeMark type={normalizeFoodType(item.menuId?.foodType)} />
+                          <p
+                            className={`truncate text-[15px] font-medium ${
+                              isCancelled
+                                ? "text-gray-400 line-through"
+                                : "text-gray-900"
+                            }`}
+                          >
+                            {item.menuId?.dishName || "Item"}
+                          </p>
+                        </div>
+                        <p className="text-xs text-gray-500">
+                          {item.variantName} • ₹{item.finalprice ?? item.price}
                         </p>
+                        {isCancelled && item.cancelReason && (
+                          <p className="mt-0.5 text-xs italic text-red-500">
+                            {item.cancelReason}
+                          </p>
+                        )}
                       </div>
-                      <p className="text-xs text-gray-500">
-                        {item.variantName} • ₹{item.finalprice ?? item.price}
-                      </p>
-                      {isCancelled && item.cancelReason && (
-                        <p className="mt-0.5 text-xs italic text-red-500">
-                          {item.cancelReason}
-                        </p>
-                      )}
                     </div>
+
+                    <span className="text-sm text-gray-700">{item.quantity}</span>
+
+                    {isCancelled ? (
+                      <StatusBadge status="No Progress" />
+                    ) : (
+                      <ItemStatusDropdown
+                        value={item.status}
+                        onChange={(newStatus) => updateItemStatus(idx, newStatus)}
+                        hideCancel
+                      />
+                    )}
+
+                    {!isCancelled && (
+                      <button
+                        onClick={() => setCancelTarget({ itemIndex: idx })}
+                        title="Cancel this dish"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-300 transition-colors duration-150 hover:bg-red-50 hover:text-red-600"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    )}
                   </div>
-
-                  <span className="text-sm text-gray-700">{item.quantity}</span>
-
-                  {isCancelled ? (
-                    <StatusBadge status="No Progress" />
-                  ) : (
-                    <ItemStatusDropdown
-                      value={item.status}
-                      onChange={(newStatus) => updateItemStatus(idx, newStatus)}
-                      hideCancel
-                    />
-                  )}
-
-                  {!isCancelled && (
-                    <button
-                      onClick={() => setCancelTarget({ itemIndex: idx })}
-                      title="Cancel this dish"
-                      className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-300 transition-colors duration-150 hover:bg-red-50 hover:text-red-600"
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        {/* Total */}
         <div className="mt-4 flex items-center justify-between border-t border-gray-200 pt-4">
           <span className="text-sm font-semibold text-gray-700">Total</span>
           <span className="text-sm font-bold text-gray-900">
@@ -366,7 +385,6 @@ const OrderDetail = ({ order }) => {
           </span>
         </div>
 
-        {/* Actions */}
         <div className="mt-6 flex items-center justify-between border-t border-gray-200 pt-5">
           <button
             onClick={markAllReady}

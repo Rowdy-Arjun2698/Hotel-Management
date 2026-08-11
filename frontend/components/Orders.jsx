@@ -15,7 +15,7 @@ const STATUS_STYLES = {
 
 const STATUS_LABELS = {
   Placed: "Placed",
-  Preparing: "Preparing" ,
+  Preparing: "Preparing",
   Ready: "Ready",
   Served: "Served",
   Cancelled: "Cancelled",
@@ -27,19 +27,17 @@ const Orders = () => {
   const url = import.meta.env.VITE_BACKEND_URL;
   const navigate = useNavigate();
 
-  const {  hotel, table, session, items } = useContext(CustomerContext);
-  console.log(hotel, table, session, items);
+  const { hotel, table, session, items } = useContext(CustomerContext);
 
   const [loading, setLoading] = useState(true);
-  const [generatingBill, setGeneratingBill] = useState(false);
   const [error, setError] = useState("");
   const [order, setOrder] = useState(null);
 
   const fetchOrder = async () => {
     try {
-     const res = await axios.get(`${url}/api/customer/orders`, {
-                withCredentials: true,
-            });
+      const res = await axios.get(`${url}/api/customer/orders`, {
+        withCredentials: true,
+      });
       setOrder(res.data.order || null);
     } catch (err) {
       console.log(err);
@@ -50,55 +48,34 @@ const Orders = () => {
   };
 
   useEffect(() => {
-    
-      fetchOrder();
- 
+    fetchOrder();
   }, []);
-
-  const handleGenerateBill = async () => {
-    if (generatingBill) return;
-    setGeneratingBill(true);
-    try {
-      const res = await axios.post(
-        `${url}/api/customer/bill/generate`,
-        { sessionId: session?._id },
-        { withCredentials: true }
-      );
-      navigate(`/bill/${res.data.bill._id}`);
-    } catch (err) {
-      console.log(err);
-      setError("Couldn't generate the bill. Please try again.");
-    } finally {
-      setGeneratingBill(false);
-    }
-  };
 
   if (loading) {
     return <Loader message="Fetching your order" />;
   }
 
   const hasOrder = order && order.items.length > 0;
-  const hasPending = items.length > 0;
 
   return (
     <div className="min-h-full bg-slate-50 pb-6">
-      <div className="px-5 pt-5 pb-3">
+      {/* Header */}
+      <div className="px-5 pt-5 pb-4">
         <h1 className="text-lg font-semibold text-slate-800">Your order</h1>
-        <p className="text-sm text-slate-400">
+        <p className="text-sm text-slate-400 mt-0.5">
           {hotel?.hotelName ? `${hotel.hotelName} · ` : ""}
           {table?.tableNumber ? `Table ${table.tableNumber}` : "Table"}
         </p>
+
         {order && (
-  <div className="mt-2">
-    <span
-      className={`text-xs font-semibold px-3 py-1 rounded-full ${
-        STATUS_STYLES[order.orderStatus] || "bg-slate-100 text-slate-500"
-      }`}
-    >
-      Order Status: {STATUS_LABELS[order.orderStatus] || order.orderStatus}
-    </span>
-  </div>
-)}
+          <span
+            className={`mt-3 inline-flex items-center text-xs font-semibold px-3 py-1 rounded-full ${
+              STATUS_STYLES[order.orderStatus] || "bg-slate-100 text-slate-500"
+            }`}
+          >
+            Order Status: {STATUS_LABELS[order.orderStatus] || order.orderStatus}
+          </span>
+        )}
       </div>
 
       {error && (
@@ -113,44 +90,47 @@ const Orders = () => {
         </h2>
 
         {hasOrder ? (
-          <div className="space-y-2.5 mb-3">
-            <div className="rounded-2xl bg-white border border-slate-100 shadow-sm overflow-hidden">
-              <div className="divide-y divide-slate-100">
-                {order.items.map((item,index) => (
-                  <div
-                    key={item.menuId._id + index}
-                    className="flex items-center justify-between px-4 py-2.5"
-                  >
-                    <div>
-                      <div className="ant flex flex-row items-center gap-2 ">
-                      <p className="text-sm text-slate-700">
-                        {item.menuId?.dishName || "Dish Name"}{" "}
+          <div className="rounded-2xl bg-white border border-slate-100 shadow-sm overflow-hidden mb-4">
+            <div className="divide-y divide-slate-100">
+              {order.items.map((item, index) => (
+                <div
+                  key={item.menuId._id + index}
+                  className="flex items-start justify-between gap-3 px-4 py-3"
+                >
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-baseline gap-x-1.5">
+                      <p className="text-sm font-medium text-slate-800">
+                        {item.menuId?.dishName || "Dish Name"}
                       </p>
-                      <p className="text-sm text-slate-700">
-                        {item.variantName}{" "}
-                        <span className="text-slate-400">
-                          · Qty {item.quantity}
-                        </span>
+                      <p className="text-sm text-slate-500">
+                        {item.variantName}
+                        <span className="text-slate-400"> · Qty {item.quantity}</span>
                       </p>
-                      </div>
-                      <span
-                        className={`text-xs font-medium px-2.5 py-1 rounded-full inline-block mt-1 ${
-                          STATUS_STYLES[item.status] || "bg-slate-100 text-slate-500"
-                        }`}
-                      >
-                        {STATUS_LABELS[item.status] || item.status}
-                      </span>
                     </div>
-                    <p className="text-sm font-medium text-slate-700">
-                      {currency(item.price * item.quantity)}
-                    </p>
+                    <span
+                      className={`text-xs font-medium px-2.5 py-1 rounded-full inline-block mt-1.5 ${
+                        STATUS_STYLES[item.status] || "bg-slate-100 text-slate-500"
+                      }`}
+                    >
+                      {STATUS_LABELS[item.status] || item.status}
+                    </span>
                   </div>
-                ))}
-              </div>
+                  <p className="text-sm font-semibold text-slate-700 whitespace-nowrap">
+                    {currency(item.price * item.quantity)}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-t border-slate-100">
+              <p className="text-sm text-slate-500">Placed so far</p>
+              <p className="text-sm font-semibold text-slate-800">
+                {currency(order.totalAmount)}
+              </p>
             </div>
           </div>
         ) : (
-          <div className="rounded-2xl bg-white border border-slate-100 shadow-sm px-4 py-6 text-center mb-3">
+          <div className="rounded-2xl bg-white border border-slate-100 shadow-sm px-4 py-8 text-center mb-4">
             <p className="text-sm text-slate-400">
               Add items from the menu to start your order.
             </p>
@@ -162,23 +142,6 @@ const Orders = () => {
             </button>
           </div>
         )}
-
-        {hasOrder && (
-          <div className="flex items-center justify-between px-1 mb-5">
-            <p className="text-sm text-slate-400">Placed so far</p>
-            <p className="text-sm font-semibold text-slate-700">
-              {currency(order.totalAmount)}
-            </p>
-          </div>
-        )}
-
-        <button
-          onClick={handleGenerateBill}
-          disabled={generatingBill || !hasOrder || hasPending}
-          className="w-full mb-24 rounded-xl border border-slate-200 bg-white py-3 text-sm font-medium text-slate-700 disabled:opacity-60"
-        >
-          {generatingBill ? "Generating bill…" : "Generate bill"}
-        </button>
       </div>
 
       <PendingCart onOrderConfirmed={fetchOrder} />

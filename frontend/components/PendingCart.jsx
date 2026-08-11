@@ -17,7 +17,7 @@ const PendingCart = ({ onOrderConfirmed }) => {
   );
 
   const removePendingItem = (cartId) => {
-    setitems((prev) => prev.filter((i) => i.cartId !== cartId ));
+    setitems((prev) => prev.filter((i) => i.cartId !== cartId));
   };
 
   const handleConfirmOrder = async () => {
@@ -27,11 +27,7 @@ const PendingCart = ({ onOrderConfirmed }) => {
     try {
       await axios.post(
         `${url}/api/customer/order/confirm`,
-        {
-          sessionId: session?._id,
-          tableId: table?._id,
-          items,
-        },
+        { items },
         { withCredentials: true }
       );
       setitems([]);
@@ -59,27 +55,27 @@ const PendingCart = ({ onOrderConfirmed }) => {
         <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">
           Ordering now
         </h2>
-        <div className="rounded-2xl bg-amber-50 border border-amber-100 divide-y divide-amber-100 mb-24">
+        <div className="rounded-2xl bg-amber-50 border border-amber-100 divide-y divide-amber-100 mb-28 overflow-hidden">
           {items.map((item) => (
             <div
               key={item.cartId}
-              className="flex items-center justify-between px-4 py-3"
+              className="flex items-center justify-between gap-3 px-4 py-3"
             >
-              <div>
-                <p className="text-sm font-medium text-slate-800">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-slate-800 truncate">
                   {item.dishName}
                 </p>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-500 mt-0.5">
                   Qty {item.quantity} · {currency(item.price)}
                 </p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 shrink-0">
                 <p className="text-sm font-semibold text-slate-700">
                   {currency(item.price * item.quantity)}
                 </p>
                 <button
                   onClick={() => removePendingItem(item.cartId)}
-                  className="text-xs text-red-400"
+                  className="text-xs font-medium text-red-400 hover:text-red-500"
                 >
                   Remove
                 </button>
