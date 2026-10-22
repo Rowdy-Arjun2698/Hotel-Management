@@ -30,8 +30,8 @@ export const CustomerProvider = ({children}) => {
                 setSession,
                 clearSession,
                 url,
-                items,
-                setitems
+               items,
+               setitems
             }}
         >
             {children}

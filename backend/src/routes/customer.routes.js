@@ -1,7 +1,7 @@
 const express = require("express")
 const router=express.Router();
 const {authotel}=require("../middleware/auth.middleware")
-const {allfetch,fetchMenu,fetchOrder,confirmOrder}=require("../controllers/customer.controllers");
+const {allfetch,fetchMenu,fetchOrder,confirmOrder,status,generateBill,getBillPreview}=require("../controllers/customer.controllers");
 const customerAuth = require("../middleware/customerAuth.middleware");
 
 router.get('/start/:id',allfetch)
@@ -11,7 +11,9 @@ router.post("/order/confirm", (req, res, next) => {
     console.log("Reached confirm route");
     next();
 }, customerAuth, confirmOrder);
-
+router.get('/order-status',customerAuth,status)
+router.post('/generate-bill',customerAuth,generateBill)
+router.get('/bill-preview',customerAuth,getBillPreview)
 
 
 

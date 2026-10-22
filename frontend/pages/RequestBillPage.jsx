@@ -17,7 +17,7 @@ const RequestBillPage = () => {
   const checkStatus = async () => {
     setStatus("checking");
     try {
-      const res = await axios.get(`${url}/api/customer/order-status/${tableId}`, {
+      const res = await axios.get(`${url}/api/customer/order-status`, {
         withCredentials: true,
       });
       if (res.data.allServed) {
@@ -26,6 +26,7 @@ const RequestBillPage = () => {
         setPendingItems(res.data.pendingItems || []);
         setStatus("not-ready");
       }
+      console.log("Order status:", res.data);
     } catch (err) {
       console.log(err);
       setStatus("not-ready");
@@ -40,7 +41,7 @@ const RequestBillPage = () => {
     setGenerating(true);
     try {
       await axios.post(
-        `${url}/api/customer/generate-bill/${tableId}`,
+        `${url}/api/customer/generate-bill`,
         {},
         { withCredentials: true }
       );
@@ -90,6 +91,7 @@ const RequestBillPage = () => {
                 <ul className="space-y-1 text-sm text-gray-700">
                   {pendingItems.map((item, idx) => (
                     <li key={idx}>• {item}</li>
+                    
                   ))}
                 </ul>
               </div>

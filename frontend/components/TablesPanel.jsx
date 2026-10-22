@@ -35,9 +35,9 @@ function getOrderStatus(order) {
   return order.items[0].status || "Active";
 }
 
-// NEW: an order stays visible on the tables panel as long as at least
-// one item still needs to be served — i.e. it's not yet Served and
-// not Cancelled. Once every item is Served/Cancelled, it drops off.
+// An order stays visible on the tables panel as long as at least one
+// item still needs to be served — i.e. it's not yet Served and not
+// Cancelled. Once every item is Served/Cancelled, it drops off.
 function isOrderStillPending(order) {
   const items = order.items || [];
   if (items.length === 0) return false;
@@ -45,7 +45,8 @@ function isOrderStillPending(order) {
 }
 
 const TablesPanel = ({ tables, selectedId, onSelect }) => {
-  // NEW: filter down to orders that still have unserved items.
+  // Extra safety net — filters again here even though OrdersHotel
+  // already sends a filtered list, so this component is self-contained.
   const orders = (tables || []).filter(isOrderStillPending);
 
   return (

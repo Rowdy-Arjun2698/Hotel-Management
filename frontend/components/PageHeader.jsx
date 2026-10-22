@@ -3,7 +3,6 @@ import { ArrowLeft } from "lucide-react";
 
 const PageHeader = ({ title, onBack }) => {
   const navigate = useNavigate();
-
   return (
     <div className="mb-4 flex items-center gap-3">
       <button
